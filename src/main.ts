@@ -372,11 +372,11 @@ export default class FloatingToc extends Plugin {
 					: creatToc(app, this)
 				: false;
 		};
-		let isLoadOnMobile = this.settings.isLoadOnMobile;
-		if (Platform.isMobileApp && isLoadOnMobile) {
-			console.log(`floating toc disable loading on mobile`);
-			return;
-		}
+		// let isLoadOnMobile = this.settings.isLoadOnMobile;
+		// if (Platform.isMobileApp && isLoadOnMobile) {
+		// 	console.log(`floating toc disable loading on mobile`);
+		// 	return;
+		// }
 		this.addCommand({
 			id: "pin-toc-panel",
 			name: "Pinning the Floating TOC panel",

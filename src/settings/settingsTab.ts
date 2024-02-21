@@ -97,20 +97,20 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
 
   
 
-    new Setting(containerEl)
-      .setName(t('Mobile enabled or not')
-      )
-      .setDesc(
-        t("Whether to enable the plugin for the mobile client, the default is enabled.")
-      )
-      .addToggle(toggle => toggle.setValue(this.plugin.settings?.isLoadOnMobile)
-        .onChange((value) => {
-          this.plugin.settings.isLoadOnMobile = value;
-          this.plugin.saveSettings();
-          setTimeout(() => {
-            dispatchEvent(new Event("refresh-toc"));
-          }, 100);
-        }));
+    // new Setting(containerEl)
+    //   .setName(t('Mobile enabled or not')
+    //   )
+    //   .setDesc(
+    //     t("Whether to enable the plugin for the mobile client, the default is enabled.")
+    //   )
+    //   .addToggle(toggle => toggle.setValue(this.plugin.settings?.isLoadOnMobile)
+    //     .onChange((value) => {
+    //       this.plugin.settings.isLoadOnMobile = value;
+    //       this.plugin.saveSettings();
+    //       setTimeout(() => {
+    //         dispatchEvent(new Event("refresh-toc"));
+    //       }, 100);
+    //     }));
 
     // new Setting(containerEl)
     // .setName(t("Default Collapsed Level"))
