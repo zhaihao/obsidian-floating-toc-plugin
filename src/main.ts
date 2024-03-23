@@ -449,6 +449,22 @@ export default class FloatingToc extends Plugin {
 				}
 			},
 		});
+		this.addCommand({
+			id: "toggle-position-style",
+			name: "Toggle Floating TOC Position (left/right)",
+			icon: "switch",
+			callback: () => {
+				if (this.settings.positionStyle === "left") {
+					this.settings.positionStyle = "right";
+				} else if (this.settings.positionStyle === "right") {
+					this.settings.positionStyle = "left";
+				} else if (this.settings.positionStyle === "both") {
+					new Notice("Position style set to both. Toogle position only works when fixed position (left or right) is selected.");
+				}
+				this.saveSettings();
+				dispatchEvent(new Event("refresh-toc"))
+			},
+		});
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", () => {
 				let view = this.app.workspace.getActiveViewOfType(MarkdownView);
