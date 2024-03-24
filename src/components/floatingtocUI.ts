@@ -26,8 +26,10 @@ export async function renderHeader(
     component?: Component | null
 ) {
 
-    const regex = /(?<=^\s*)[0-9]+\.\s/; //有序列表
-    const regex2 = /(?<=^\s*)[\-\+]\s/; //无序列表
+    // 有序列表
+    const regex = /^(?:\s*)[0-9]+\.\s/;
+    // 无序列表
+    const regex2 = /^(?:\s*)[\-\+]\s/;
     let m;
     let prelist = "";
     if ((m = regex.exec(source)) !== null) {
