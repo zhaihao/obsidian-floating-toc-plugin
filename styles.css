@@ -552,7 +552,9 @@ body.enable-heading-nowrap .heading-list-item .text-wrap .text {
   padding: 1px 2px 1px 2px;
 }
 
-
+.view-content:has(.markdown-source-view.hide-floating-toc) .floating-toc { 
+  display: none; 
+}
 .floating-toc {
   overflow: hidden;
   list-style: none;
@@ -566,7 +568,6 @@ body.enable-heading-nowrap .heading-list-item .text-wrap .text {
   bottom: 40px;
   /* width: 13rem; */
   scroll-behavior: smooth;
-  min-height: max-content;
   max-height: calc(100% - 135px) ;
   left:var(--floating-toc-position);
   padding-top: 0.5rem;
