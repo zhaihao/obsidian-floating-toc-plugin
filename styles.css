@@ -643,6 +643,9 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
   padding-left:  var(--floating-toc-line-width);
 }
 
+.workspace-leaf-content .floating-toc-div.pin:is(.floating-left,.floating-both)~.markdown-reading-view > .markdown-preview-view.markdown-rendered{
+  padding-left: var(--floating-toc-line-width);
+ }
 
 .workspace-leaf-content .floating-toc-div:is(.floating-left,.floating-both)~.markdown-reading-view .markdown-preview-view {
   padding-left: 4rem;

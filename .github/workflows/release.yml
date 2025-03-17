@@ -1,0 +1,150 @@
+name: Release Obsidian plugin
+
+on:
+    workflow_dispatch:
+        inputs:
+            release_notes:
+                description: '发布说明'
+                required: false
+                default: '✨'
+    push:
+        # Sequence of patterns matched against refs/tags
+        tags:
+            - "*" # Push events to matching any tag format, i.e. 1.0, 20.15.10
+env:
+    PLUGIN_NAME: floating-toc
+    OUTPUT_DIR: ./build
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                fetch-depth: 0  # 获取完整的提交历史，用于生成 changelog
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 16
+            - name: Get tag version
+              id: get_version
+              # 提取纯标签名称，去掉 refs/tags/ 前缀
+              run: |
+                  TAG_NAME=${GITHUB_REF#refs/tags/}
+                  echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
+                  echo "Tag version: $TAG_NAME"
+            
+            - name: Generate Changelog
+              id: changelog
+              run: |
+                if [ "${{ github.event_name }}" == "push" ]; then
+                  # 获取上一个标签
+                  PREVIOUS_TAG=$(git describe --tags --abbrev=0 ${{ steps.get_version.outputs.version }}^ 2>/dev/null || echo "")
+
+                  
+                  # 使用 git log 获取提交信息，但过滤掉不需要的内容
+                  git log --pretty=format:"### %s%n%b" $PREVIOUS_TAG..${{ steps.get_version.outputs.version }} | grep -v "^Update CHANGELOG.md" | grep -v "^Update manifest.json and CHANGELOG.md for version" | grep -v "^$" > COMMITS.tmp
+                  
+                  # 处理提交信息，去除重复标题
+                  PREV_TITLE=""
+                  while IFS= read -r line; do
+                    # 如果行以 ### 开头，它是一个标题
+                    if [[ $line == "### "* ]]; then
+                      TITLE=${line:4}  # 去掉 "### " 前缀
+                      # 如果标题与正文相同，跳过标题
+                      NEXT_LINE=$(head -n 1 COMMITS.tmp)
+                      if [[ "$TITLE" != "$NEXT_LINE" ]]; then
+                        echo "$line" >> CHANGELOG.tmp
+                      fi
+                    else
+                      # 如果不是标题，直接添加
+                      echo "$line" >> CHANGELOG.tmp
+                    fi
+                  done < COMMITS.tmp
+                  
+                  # 将 changelog 内容保存到输出变量
+                  CHANGELOG=$(cat CHANGELOG.tmp)
+                  echo "changelog<<EOF" >> $GITHUB_OUTPUT
+                  echo "$CHANGELOG" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+                  
+                  # 更新项目中的 CHANGELOG.md 文件
+                  if [ -f "CHANGELOG.md" ]; then
+                    # 如果文件已存在，创建新的临时文件
+                    echo "# Changelog" > CHANGELOG.new
+                    echo "" >> CHANGELOG.new
+                    echo "## ${{ steps.get_version.outputs.version }} ($(date +%Y-%m-%d))" >> CHANGELOG.new
+                    cat CHANGELOG.tmp >> CHANGELOG.new
+                    echo "" >> CHANGELOG.new
+                    # 追加现有的 CHANGELOG 内容，跳过原有的标题
+                    tail -n +2 CHANGELOG.md >> CHANGELOG.new
+                    # 替换原有文件
+                    mv CHANGELOG.new CHANGELOG.md
+                    rm CHANGELOG.tmp COMMITS.tmp
+                  else
+                    # 如果文件不存在，创建新文件
+                    echo "# Changelog" > CHANGELOG.md
+                    echo "" >> CHANGELOG.md
+                    echo "## ${{ steps.get_version.outputs.version }} ($(date +%Y-%m-%d))" >> CHANGELOG.md
+                    cat CHANGELOG.tmp >> CHANGELOG.md
+                    rm CHANGELOG.tmp COMMITS.tmp
+                  fi
+                else
+                  # 如果是手动触发，使用输入的发布说明
+                  echo "${{ github.event.inputs.release_notes }}" > CHANGELOG.md
+                  echo "changelog<<EOF" >> $GITHUB_OUTPUT
+                  echo "${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+                fi
+            
+            - name: Update version in manifest.json
+              run: |
+                  # 更新根目录下的manifest.json中的version为标签版本
+                  jq '.version = "${{ steps.get_version.outputs.version }}"' manifest.json > manifest.json.tmp
+                  mv manifest.json.tmp manifest.json
+                  # 确保输出目录存在
+                  mkdir -p ${{ env.OUTPUT_DIR }}
+                  # 复制更新后的manifest.json到输出目录
+                  cp manifest.json ${{ env.OUTPUT_DIR }}/
+                  # 显示更新后的版本号，用于调试
+                  echo "Updated manifest.json version to: $(jq -r '.version' manifest.json)"
+            
+            - name: Build
+              id: build
+              run: |
+                  # 使用 --legacy-peer-deps 参数解决依赖冲突
+                  npm install --legacy-peer-deps
+                  npm run build
+                  # 为发布准备文件
+                  mkdir ${{ env.PLUGIN_NAME }}
+                  # 从实际构建输出目录复制文件
+                  cp ./styles.css ${{ env.OUTPUT_DIR }}/
+                  cp ${{ env.OUTPUT_DIR }}/main.js ${{ env.OUTPUT_DIR }}/styles.css ./manifest.json ${{ env.PLUGIN_NAME }}/
+                  zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
+                  ls
+            
+            - name: Create Release
+              id: create_release
+              uses: softprops/action-gh-release@v1
+              with:
+                  # 使用纯标签名称，不包含 refs/tags/ 前缀
+                  tag_name: ${{ steps.get_version.outputs.version }}
+                  name: Release ${{ steps.get_version.outputs.version }}
+                  body: ${{ steps.changelog.outputs.changelog }}
+                  draft: false
+                  prerelease: false
+                  files: |
+                    ${{ env.PLUGIN_NAME }}.zip
+                    ${{ env.OUTPUT_DIR }}/main.js
+                    ./manifest.json
+                    ${{ env.OUTPUT_DIR }}/styles.css
+                  token: ${{ secrets.GITHUB_TOKEN }}
+            
+            - name: Commit updated files
+              if: github.event_name == 'push'
+              run: |
+                git config --local user.email "action@github.com"
+                git config --local user.name "GitHub Action"
+                git add manifest.json CHANGELOG.md
+                git commit -m "Update manifest.json and CHANGELOG.md for version ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
+                git push origin HEAD:master
