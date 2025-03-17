@@ -1,6 +1,6 @@
 import {
 	debounce,
-	Platform,
+	Notice,
 	requireApiVersion,
 	MarkdownView,
 	Plugin,
@@ -196,163 +196,92 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 		target.parentElement?.classList.contains("markdown-reading-view")
 	) {
 		const view = app.workspace.getActiveViewOfType(MarkdownView);
-		let current_line;
-		let current_heading = {};
-		if (view) {
-			current_line = view.currentMode.getScroll() ?? 0;
-			/* 	let float_toc_dom = view.contentEl?.querySelector(".floating-toc-div");
-				let li_dom = float_toc_dom?.querySelectorAll("li.heading-list-item")
-				let headline = [];
-				li_dom?.forEach((el, i) => {
-					headline.push(li_dom[i].getAttribute("data-line"))
-				}) */
-
-			//	console.log(current_line, "cthisurrent_line")
-			let headings = plugin.headingdata;
-			let i = headings?.length ?? 0;
-			let floattoc = view.contentEl.querySelector(".floating-toc");
-			if (floattoc) {
-				let firstline = parseInt(
-					floattoc
-						.querySelector("li.heading-list-item")
-						?.getAttribute("data-line")
-				);
-				let lastline = parseInt(
-					floattoc.lastElementChild?.getAttribute("data-line")
-				);
-				//滚动到顶部，指示器定位到顶部 
-				if (current_line <= 0) {
-					let prevLocation = floattoc.querySelector(
-						".heading-list-item.located"
-					);
-					if (prevLocation) {
-						prevLocation.removeClass("located");
-					}
-
-					let curLocation = floattoc?.querySelector(
-						`li[data-line='${firstline}']`
-					);
-					if (curLocation) curLocation.addClass("located");
-
-					let level = parseInt(
-						curLocation?.getAttribute("data-level")
-					);
-					level = level > 1 ? level - 1 : 1;
-					let siblings = siblingElems(curLocation);
-					let focusele = floattoc?.querySelector(`li.focus`);
-					if (focusele) {
-						focusele.removeClass("focus");
-					}
-					siblings.some((element) => {
-						if (
-							(element as HTMLInputElement).dataset["level"] <=
-							level.toString()
-						) {
-							element.addClass("focus");
-							return true;
-						}
-					});
-
-					let Location: any =
-						floattoc.querySelector(".heading-list-item");
-					setTimeout(() => Location.scrollIntoViewIfNeeded(), 300);
+		if (!view) return;
+		
+		const current_line = view.currentMode.getScroll() ?? 0;
+		const headings = plugin.headingdata;
+		if (!headings || headings.length === 0) return;
+		
+		const floattoc = view.contentEl.querySelector(".floating-toc");
+		if (!floattoc) return;
+		
+		// 缓存DOM查询结果
+		const headingItems = floattoc.querySelectorAll("li.heading-list-item");
+		if (!headingItems.length) return;
+		
+		const firstHeadingItem = headingItems[0] as HTMLElement;
+		const lastHeadingItem = headingItems[headingItems.length - 1] as HTMLElement;
+		
+		const firstline = parseInt(firstHeadingItem.getAttribute("data-line") || "0");
+		const lastline = parseInt(lastHeadingItem.getAttribute("data-line") || "0");
+		
+		// 查找当前位置的标题
+		let targetLine = 0;
+		let targetHeading = null;
+		
+		// 滚动到顶部的处理
+		if (current_line <= 0) {
+			targetLine = firstline;
+		} else {
+			// 使用二分查找快速定位当前滚动位置对应的标题
+			let start = 0;
+			let end = headings.length - 1;
+			let foundIndex = -1;
+			
+			while (start <= end) {
+				let mid = Math.floor((start + end) / 2);
+				if (headings[mid].position.start.line <= current_line) {
+					foundIndex = mid;
+					start = mid + 1;
 				} else {
-					while (--i >= 0) {
-						if (headings[i].position.start.line <= current_line) {
-							current_heading = headings[i];
-							//	console.log(current_line, "current_line")
-							//	console.log(current_heading, "current_heading")
-							line = headings[i].position.start.line;
-							break;
-						}
-					}
-					if (!current_heading) {
-						return;
-					}
-
-					//let container = activeDocument?.querySelector(".workspace-leaf.mod-active");
-
-					let prevLocation = floattoc.querySelector(
-						".heading-list-item.located"
-					);
-					if (prevLocation) {
-						prevLocation.removeClass("located");
-					}
-
-					if (!line && floattoc) line = firstline;
-					let curLocation: any = floattoc?.querySelector(
-						`li[data-line='${line}']`
-					);
-					//console.log(curLocation, "curLocation")
-					if (curLocation) {
-						if (line == lastline || line == firstline) {
-							curLocation.addClass("located");
-						} else if (curLocation.nextElementSibling) {
-							let nextLine = parseInt(
-								curLocation.nextElementSibling.getAttribute(
-									"data-line"
-								)
-							);
-							if (nextLine <= current_line) {
-								//	console.log(nextLine,'nextLine');
-								curLocation.nextElementSibling.addClass(
-									"located"
-								);
-								let level = parseInt(
-									curLocation.nextElementSibling.getAttribute(
-										"data-level"
-									)
-								);
-								level = level > 1 ? level - 1 : 1;
-								let siblings = siblingElems(
-									curLocation.nextElementSibling
-								);
-								let focusele =
-									floattoc?.querySelector(`li.focus`);
-								if (focusele) {
-									focusele.removeClass("focus");
-								}
-								siblings.some((element) => {
-									if (
-										(element as HTMLInputElement).dataset[
-										"level"
-										] <= level.toString()
-									) {
-										element.addClass("focus");
-										return true;
-									}
-								});
-							} else {
-								//	console.log(view.editor.getScrollInfo(),'getLine');
-								curLocation.addClass("located");
-								let level = parseInt(
-									curLocation.getAttribute("data-level")
-								);
-								level = level > 1 ? level - 1 : 1;
-								let siblings = siblingElems(curLocation);
-								let focusele =
-									floattoc?.querySelector(`li.focus`);
-								if (focusele) {
-									focusele.removeClass("focus");
-								}
-								siblings.some((element) => {
-									if (
-										(element as HTMLInputElement).dataset[
-										"level"
-										] <= level.toString()
-									) {
-										element.addClass("focus");
-										return true;
-									}
-								});
-							}
-						}
-						//curLocation.scrollIntoView({ block: "center" })
-						curLocation.scrollIntoViewIfNeeded();
-					}
+					end = mid - 1;
 				}
 			}
+			
+			if (foundIndex !== -1) {
+				targetLine = headings[foundIndex].position.start.line;
+				targetHeading = headings[foundIndex];
+			} else {
+				targetLine = firstline;
+			}
 		}
+		
+		// 更新UI
+		// 1. 移除之前的高亮
+		const prevLocation = floattoc.querySelector(".heading-list-item.located");
+		if (prevLocation) {
+			prevLocation.removeClass("located");
+		}
+		
+		// 2. 添加新的高亮
+		const curLocation = floattoc.querySelector(`li[data-line='${targetLine}']`) as HTMLElement;
+		if (!curLocation) return;
+		
+		curLocation.addClass("located");
+		
+		// 3. 更新焦点元素
+		const level = parseInt(curLocation.getAttribute("data-level") || "1");
+		const adjustedLevel = level > 1 ? level - 1 : 1;
+		
+		const focusele = floattoc.querySelector(`li.focus`);
+		if (focusele) {
+			focusele.removeClass("focus");
+		}
+		
+		// 4. 查找并设置焦点元素
+		const siblings = siblingElems(curLocation);
+		for (let i = 0; i < siblings.length; i++) {
+			const element = siblings[i] as HTMLElement;
+			if (element.dataset["level"] <= adjustedLevel.toString()) {
+				element.addClass("focus");
+				break;
+			}
+		}
+		
+		// 5. 滚动到可见区域
+		requestAnimationFrame(() => {
+			curLocation.scrollIntoView({ block: "nearest", behavior: "smooth" });
+		});
 	}
 }
 export default class FloatingToc extends Plugin {
@@ -600,7 +529,7 @@ export default class FloatingToc extends Plugin {
 		updateHeadingsForView(
 			this.app.workspace.getActiveViewOfType(MarkdownView)
 		);
-		if (requireApiVersion("0.15.0")) {
+		
 			this.app.workspace.on("window-open", (leaf) => {
 				leaf.doc.addEventListener(
 					"scroll",
@@ -610,9 +539,10 @@ export default class FloatingToc extends Plugin {
 					true
 				);
 			});
-		}
-		app.workspace.onLayoutReady(() => {
-			app.workspace.trigger("parse-style-settings");
+		
+		
+		this.app.workspace.onLayoutReady(() => {
+			this.app.workspace.trigger("parse-style-settings");
 		});
 	}
 
@@ -623,13 +553,47 @@ export default class FloatingToc extends Plugin {
 		requireApiVersion("0.15.0")
 			? (activeDocument = activeWindow.document)
 			: (activeDocument = window.document);
-		activeDocument.removeEventListener(
-			"scroll",
-			(event) => {
-				this.handleScroll(this.app, this, event);
-			},
-			true
-		);
+		
+		// 清理滚动事件监听器
+		try {
+			activeDocument.removeEventListener(
+				"scroll",
+				(event) => {
+					this.handleScroll(this.app, this, event);
+				},
+				true
+			);
+		} catch (e) {
+			console.error("Error removing scroll event listener:", e);
+		}
+		
+		// 清理虚拟列表和其他资源
+		try {
+			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (view) {
+				const floatingTocWrapper = view.contentEl?.querySelector(".floating-toc-div");
+				if (floatingTocWrapper) {
+					// 移除所有事件监听器
+					const headingItems = floatingTocWrapper.querySelectorAll("li.heading-list-item");
+					headingItems.forEach(item => {
+						// 尝试移除所有可能的事件监听器
+						const clone = item.cloneNode(true);
+						if (item.parentNode) {
+							item.parentNode.replaceChild(clone, item);
+						}
+					});
+					
+					// 清理自定义清理函数
+					if ((floatingTocWrapper as any)._tocCleanup) {
+						(floatingTocWrapper as any)._tocCleanup();
+					}
+				}
+			}
+		} catch (e) {
+			console.error("Error cleaning up resources:", e);
+		}
+		
+		// 移除所有浮动目录元素
 		selfDestruct();
 	}
 	setHeadingdata(content: HeadingCache): void {
