@@ -220,7 +220,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 				let lastline = parseInt(
 					floattoc.lastElementChild?.getAttribute("data-line")
 				);
-				//滚动到顶部，指示器定位到顶部
+				//滚动到顶部，指示器定位到顶部 
 				if (current_line <= 0) {
 					let prevLocation = floattoc.querySelector(
 						".heading-list-item.located"
