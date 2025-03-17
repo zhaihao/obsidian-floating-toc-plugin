@@ -643,11 +643,11 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
   padding-left:  var(--floating-toc-line-width);
 }
 
-.workspace-leaf-content .floating-toc-div.pin:is(.floating-left,.floating-both)~.markdown-reading-view > .markdown-preview-view.markdown-rendered{
+.workspace-leaf-content .floating-toc-div.pin:is(.floating-left,.floating-both)~.markdown-reading-view{
   padding-left: var(--floating-toc-line-width);
  }
 
-.workspace-leaf-content .floating-toc-div:is(.floating-left,.floating-both)~.markdown-reading-view .markdown-preview-view {
+.workspace-leaf-content .floating-toc-div:is(.floating-left,.floating-both)~.markdown-reading-view {
   padding-left: 4rem;
 }
 
@@ -670,7 +670,7 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
 
 
 
-.workspace-leaf-content .floating-toc-div.floating-right~.markdown-reading-view .markdown-preview-view {
+.workspace-leaf-content .floating-toc-div.floating-right~.markdown-reading-view {
   padding-right: 2rem;
   
 }
@@ -940,7 +940,7 @@ margin-left: 0.2rem;
 
 
 /**第二个tabs右侧*/
-.workspace-tabs~.workspace-tabs.mod-top-right-space  .floating-toc-div.floating-both~.markdown-reading-view .markdown-preview-view {
+.workspace-tabs~.workspace-tabs.mod-top-right-space  .floating-toc-div.floating-both~.markdown-reading-view {
   padding-right: 2rem;
   
 }
@@ -993,7 +993,7 @@ margin-left: 0.2rem;
 }
 
 .workspace-split.mod-vertical  .workspace-tabs  ~.workspace-tabs 
-.floating-toc-div.floating-both~.markdown-reading-view .markdown-preview-view {
+.floating-toc-div.floating-both~.markdown-reading-view {
   padding-right: 2rem;
   
 }
@@ -1003,7 +1003,7 @@ margin-left: 0.2rem;
   padding-right: 2rem;
   padding-left: 0;
 }
-.workspace-split.mod-vertical > .workspace-tabs ~.workspace-tabs .floating-toc-div.floating-both ~.markdown-reading-view .markdown-preview-view {
+.workspace-split.mod-vertical > .workspace-tabs ~.workspace-tabs .floating-toc-div.floating-both ~.markdown-reading-view{
   padding-left: 2rem;
   padding-right: 4rem;
 }
