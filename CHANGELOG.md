@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.3 (2025-03-24)
+### 增加 bold 样式
+感谢 @QuestionWorks 的贡献。
+### Update manifest.json and CHANGELOG.md for version 2.5.2
+
+
 ## 2.5.2 (2025-03-22)
 ### #129 #125 fixed
 ### Update manifest.json
