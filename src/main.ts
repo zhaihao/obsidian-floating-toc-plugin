@@ -298,7 +298,7 @@ export default class FloatingToc extends Plugin {
 			view
 				? refresh_node(this, view)
 					? false
-					: creatToc(app, this)
+					: creatToc(this.app, this)
 				: false;
 		};
 		// let isLoadOnMobile = this.settings.isLoadOnMobile;

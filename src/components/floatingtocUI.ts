@@ -140,7 +140,7 @@ export async function createLi(
     index: number
 ) {
     // 检查是否是大型文档
-    const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 30;
+    const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 100;
     let li_dom = ul_dom.createEl("li");
     li_dom.addClass("heading-list-item");
     li_dom.setAttribute("data-level", heading.level.toString());
