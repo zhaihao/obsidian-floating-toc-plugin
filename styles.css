@@ -318,6 +318,8 @@ settings:
   --floating-toc-position: 0px;
   --focus-heading: 0.9;
   --floating-toc-line-width: 18rem;
+  --actual-toc-width: 18rem;
+
 
 }
 
@@ -500,7 +502,7 @@ body.enable-bold-bar .heading-list-item .text-wrap {
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="1"] .heading-rendered::before,
 body.enable-bold-bar .floating-toc-div.hover .heading-list-item[data-level="1"] .heading-rendered::before 
 {
-  margin-left: 1rem;
+  margin-left: 1.2rem;
 }
  
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="2"] .heading-rendered::before,
@@ -714,7 +716,7 @@ body.enable-bold-bar .floating-toc:hover .heading-list-item>.line-wrap {
   width: auto;
   overflow-y: auto;
   background: var(--floating-toc-background-color);
-}
+ }
 
 .floating-toc-div.pin .floating-toc {
   background: var(--floating-toc-header-background-color);
@@ -738,6 +740,9 @@ body:not(.enable-heading-nowrap) .floating-toc:hover .heading-list-item {
   min-height: auto;
   height: fit-content;
   border: 1px solid var(--background-modifier-border);
+}
+.floating-toc-div:is(.hover, .pin) .floating-toc:empty{
+  display: none;
 }
 
 .floating-toc-div.pin .floating-toc .heading-list-item {
@@ -781,11 +786,11 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
 }
 
 .workspace-leaf-content .floating-toc-div.pin:is(.floating-left, .floating-both)+.markdown-source-view>.cm-editor {
-  padding-left: var(--floating-toc-line-width);
+  padding-left: min(var(--floating-toc-line-width), var(--actual-toc-width));
 }
 
 .workspace-leaf-content .floating-toc-div.pin:is(.floating-left, .floating-both)~.markdown-reading-view {
-  padding-left: var(--floating-toc-line-width);
+  padding-left: min(var(--floating-toc-line-width), var(--actual-toc-width));
 }
 
 .workspace-leaf-content .floating-toc-div:is(.floating-left, .floating-both)~.markdown-reading-view {
@@ -915,7 +920,7 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
   }
 }
 
-.floating-toc-div .toolbar.pin.hide {
+.floating-toc-div:not(.pin) .toolbar.hide {
   display: none;
 }
 
@@ -926,9 +931,9 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
   position: fixed;
   top: 75px;
   left: 0;
-  width: 6rem;
+  
 }
-
+ 
 .floating-toc-div.pin .toolbar.pin {
   display: block;
 }
@@ -1030,6 +1035,7 @@ heading-list-item.focus .text {
   width: 2rem;
   overflow: hidden;
   margin-left: var(--indicator-bar-position);
+  
 }
 
 .floating-toc-div:hover .heading-list-item {
@@ -1477,7 +1483,10 @@ body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list
   border-left: 2px solid hsla(var(--color-accent-hsl), 0.9);
   pointer-events: none;
 }
-
+body.float-curves-outline-style.enable-bold-bar .floating-toc-div:is(.hover, .pin) .heading-list-item:not([iscollapsed])::before
+{
+left: 2rem;
+}
 .heading-list-item[data-level='2']::before {
   left: 0.7rem;
 }
@@ -1514,6 +1523,10 @@ body.float-outline-style .heading-list-item[data-level='6']+.heading-list-item[d
   pointer-events: none;
 
 }
+body.float-outline-style.enable-bold-bar .heading-list-item::before
+{
+  left: 2.2rem;
+}
 
 /*********/
 
@@ -1545,9 +1558,9 @@ body.float-outline-style .heading-list-item[data-level='6']+.heading-list-item[d
   z-index: 2;
   left: 0;
   /* 使伪元素位于li的最左边 */
-  top: 50%;
+  top: 65%;
   /* 垂直居中 */
-  transform: translateY(-50%);
+  transform: translateY(-65%);
   /* 偏移自身高度的一半以实现精确的垂直居中 */
   text-align: center;
   /* 确保字符水平居中 */
@@ -1564,8 +1577,8 @@ body.float-outline-style .heading-list-item[data-level='6']+.heading-list-item[d
   padding-right: 0.5rem;
   z-index: 2;
   left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 65%;
+  transform: translateY(-65%);
   text-align: center;
 }
 

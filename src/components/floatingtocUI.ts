@@ -15,6 +15,7 @@ import {
     hasChildHeading,
     collapseHeading,
     expandHeading,
+    toggleAllHeadings,
 } from "./toggleCollapse";
 
 export async function renderHeader(
@@ -135,60 +136,60 @@ export async function renderHeader(
 export async function createLi(
     plugin: FloatingToc,
     view: MarkdownView,
-    ul_dom: HTMLElement,
+    ul_dom: HTMLElement |DocumentFragment,
     heading: HeadingCache,
     index: number
 ) {
     // 检查是否是大型文档
-    const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 100;
+   // const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 100;
     let li_dom = ul_dom.createEl("li");
     li_dom.addClass("heading-list-item");
-    li_dom.setAttribute("data-level", heading.level.toString());
+    li_dom.setAttribute("data-level", heading?.level?.toString() ?? "");
     li_dom.setAttribute("data-id", index.toString());
-    li_dom.setAttribute("data-line", heading.position.start.line.toString());
+    li_dom.setAttribute("data-line", heading?.position?.start?.line?.toString() ?? "");
     let text_dom = li_dom.createEl("div");
     text_dom.addClass("text-wrap");
     
-    if (isLargeDocument) {
+    // if (isLargeDocument) {
          
-        // 对于大型文档，使用简化的渲染方式以提高性能
-        // 直接创建文本元素而不使用Markdown渲染
-        const textEl = text_dom.createEl("a");
-        textEl.addClass("text");
-        textEl.textContent = heading.heading;
+    //     // 对于大型文档，使用简化的渲染方式以提高性能
+    //     // 直接创建文本元素而不使用Markdown渲染
+    //     const textEl = text_dom.createEl("a");
+    //     textEl.addClass("text");
+    //     textEl.textContent = heading.heading;
         
-        // 添加点击事件
-        textEl.onclick = function(event: MouseEvent) {
-            event.stopPropagation();
-            const startline = heading.position.start.line;
+    //     // 添加点击事件
+    //     textEl.onclick = function(event: MouseEvent) {
+    //         event.stopPropagation();
+    //         const startline = heading.position.start.line;
             
-            if (event.ctrlKey || event.metaKey) {
-                foldHeader(view, startline);
-            } else {
-                openFiletoline(view, startline);
+    //         if (event.ctrlKey || event.metaKey) {
+    //             foldHeader(view, startline);
+    //         } else {
+    //             openFiletoline(view, startline);
                 
-                const prevLocation = ul_dom.querySelector(".text-wrap.located");
-                if (prevLocation) {
-                    prevLocation.removeClass("located");
-                }
-                text_dom.addClass("located");
-            }
-        };
+    //             const prevLocation = ul_dom.querySelector(".text-wrap.located");
+    //             if (prevLocation) {
+    //                 prevLocation.removeClass("located");
+    //             }
+    //             text_dom.addClass("located");
+    //         }
+    //     };
         
-        // 检查是否有子标题
-        if (hasChildHeading(index, plugin.headingdata)) {
-            li_dom.setAttribute("isCollapsed", "false");
+    //     // 检查是否有子标题
+    //     if (hasChildHeading(index, plugin.headingdata)) {
+    //         li_dom.setAttribute("isCollapsed", "false");
             
-            // 添加折叠/展开点击事件
-            li_dom.addEventListener("click", (e: MouseEvent) => {
-                e.stopPropagation();
-                toggleCollapse(e, li_dom, plugin.settings.expandAllSubheadings);
-            });
-        }
-    } else {
+    //         // 添加折叠/展开点击事件
+    //         li_dom.addEventListener("click", (e: MouseEvent) => {
+    //             e.stopPropagation();
+    //             toggleCollapse(e, li_dom, plugin.settings.expandAllSubheadings);
+    //         });
+    //     }
+    // } else {
         // 对于标题数量较少的情况，使用完整的Markdown渲染
-        await renderHeader(plugin, view, heading.heading, text_dom, view.file.path, null);
-    }
+    await renderHeader(plugin, view, heading.heading, text_dom, view.file.path, null);
+    
     
     let line_dom = li_dom.createEl("div");
     line_dom.addClass("line-wrap");
@@ -265,79 +266,15 @@ export function creatToc(app: App, plugin: FloatingToc): void {
         else floatingTocWrapper.removeClass("alignLeft");
         let ul_dom = floatingTocWrapper.createEl("ul");
         ul_dom.addClass("floating-toc");
-        let toolbar = ul_dom.createEl("div");
-        toolbar.addClass("toolbar");
-        toolbar.addClass("pin");
-        toolbar.addClass("hide");
-        let pinButton = new ButtonComponent(toolbar);
-        pinButton
-            .setIcon("pin")
-            .setTooltip("pin")
-            .onClick(() => {
-                if (floatingTocWrapper.classList.contains("pin"))
-                    floatingTocWrapper.removeClass("pin");
-                else floatingTocWrapper.addClass("pin");
-            });
-        ul_dom.onmouseenter = function () {
-            //移入事件
-            toolbar.removeClass("hide");
-            floatingTocWrapper.addClass("hover");
-        };
-        ul_dom.onmouseleave = function () {
-            //移出事件
-            toolbar.addClass("hide");
-            floatingTocWrapper.removeClass("hover");
-        };
-        let topBuuton = new ButtonComponent(toolbar);
-        topBuuton
-            .setIcon("double-up-arrow-glyph")
-            .setTooltip("Scroll to Top")
-            .setClass("top")
-            .onClick(() => {
-                const view =
-                    this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (view) {
-                    view.setEphemeralState({ scroll: 0 });
-                }
-            });
-        let bottomBuuton = new ButtonComponent(toolbar);
-        bottomBuuton
-            .setIcon("double-down-arrow-glyph")
-            .setTooltip("Scroll to Bottom")
-            .setClass("bottom")
-            .onClick(async () => {
-                const view =
-                    this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (view) {
-                 
-                     
-                        const file = this.app.workspace.getActiveFile()
-                        const content = await (this.app as any).vault.cachedRead(file);
-                        const lines = content.split('\n');
-                        let numberOfLines = lines.length;
-                        //in preview mode don't count empty lines at the end
-                        if (view.getMode() === 'preview') {
-                            while (numberOfLines > 0 && lines[numberOfLines - 1].trim() === '') {
-                                numberOfLines--;
-                            }
-                        }
-                        view.currentMode.applyScroll((numberOfLines - 1))
-           
-
-                }
-            });
-        let CopyBuuton = new ButtonComponent(toolbar);
-        CopyBuuton.setIcon("copy")
-            .setTooltip("copy to clipboard")
-            .setClass("copy")
-            .onClick(async () => {
-                let headers = plugin.headingdata.map((h: HeadingCache) => {
-                    return "    ".repeat(h.level - 1) + h.heading;
-                });
-                await navigator.clipboard.writeText(headers.join("\n"));
-                new Notice("Copied");
-            });
-
+     
+  
+        let toolbar = floatingTocWrapper.createEl("div");
+        
+        // 创建 toolbar 的内容移到这里
+        createToolbar(plugin, toolbar as HTMLElement, floatingTocWrapper as HTMLElement);
+    
+       
+       
         if (plugin.settings.ignoreHeaders) {
             let levelsToFilter = plugin.settings.ignoreHeaders.split("\n");
             plugin.headingdata = app.metadataCache
@@ -371,6 +308,7 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 loadingIndicator.style.top = "45px";
                 // 渲染初始批次
                 initialBatch.forEach((heading: HeadingCache, index: number) => {
+                  
                     createLi(plugin, view, ul_dom, heading, index);
                 });
                 
@@ -382,9 +320,10 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 const batchSize = 20; // 每批处理的标题数量
                 
                 const renderNextBatch = () => {
+                    
                     // 确定这一批次要渲染的数量
                     const batchEndIndex = Math.min(nextIndex + batchSize, totalHeadings);
-                    
+                   
                     // 更新加载指示器
                     loadingIndicator.textContent = `加载中... (${batchEndIndex}/${totalHeadings})`;
                     
@@ -421,7 +360,7 @@ export function creatToc(app: App, plugin: FloatingToc): void {
         
         // 执行渲染
         renderHeadings();
-
+      
         currentleaf
             ?.querySelector(".markdown-source-view")
             ?.insertAdjacentElement("beforebegin", floatingTocWrapper) ||
@@ -444,7 +383,107 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 if (plugin.settings.isDefaultPin)
                     floatingTocWrapper.addClass("pin");
                 genToc(view.contentEl, floatingTocWrapper);
+              plugin.updateTocWidth(floatingTocWrapper as HTMLElement, plugin.headingdata);
             } else return;
         }
     }
+}
+
+export function createToolbar(plugin: FloatingToc, toolbar: HTMLElement, float_toc_dom: HTMLElement) {
+    toolbar.addClass("toolbar");
+ 
+    toolbar.addClass("hide");
+ 
+    let pinButton = new ButtonComponent(toolbar);
+    pinButton
+        .setIcon("pin")
+        .setTooltip("pin")
+        .onClick(() => {
+            if (float_toc_dom.classList.contains("pin"))
+                float_toc_dom.removeClass("pin");
+            else float_toc_dom.addClass("pin");
+        });
+ 
+    let topBuuton = new ButtonComponent(toolbar);
+    topBuuton
+        .setIcon("double-up-arrow-glyph")
+        .setTooltip("Scroll to Top")
+        .setClass("top")
+        .onClick(() => {
+            const view =
+                this.app.workspace.getActiveViewOfType(MarkdownView);
+            if (view) {
+                view.setEphemeralState({ scroll: 0 });
+            }
+        });
+    let bottomBuuton = new ButtonComponent(toolbar);
+    bottomBuuton
+        .setIcon("double-down-arrow-glyph")
+        .setTooltip("Scroll to Bottom")
+        .setClass("bottom")
+        .onClick(async () => {
+            const view =
+                this.app.workspace.getActiveViewOfType(MarkdownView);
+            if (view) {
+             
+                 
+                    const file = this.app.workspace.getActiveFile()
+                    const content = await (this.app as any).vault.cachedRead(file);
+                    const lines = content.split('\n');
+                    let numberOfLines = lines.length;
+                    //in preview mode don't count empty lines at the end
+                    if (view.getMode() === 'preview') {
+                        while (numberOfLines > 0 && lines[numberOfLines - 1].trim() === '') {
+                            numberOfLines--;
+                        }
+                    }
+                    view.currentMode.applyScroll((numberOfLines - 1))
+       
+
+            }
+        });
+    let CopyBuuton = new ButtonComponent(toolbar);
+    CopyBuuton.setIcon("copy")
+        .setTooltip("copy TOC to clipboard")
+        .setClass("copy")
+        .onClick(async () => {
+            let headers = plugin.headingdata.map((h: HeadingCache) => {
+                const indent = "    ".repeat(h.level - 1);
+                // 创建 markdown 列表项和双链格式
+                return `${indent}- [[#${h.heading}]]`;
+            });
+            await navigator.clipboard.writeText(headers.join("\n"));
+            new Notice("TOC Copied");
+        });
+    const toggleButton = new ButtonComponent(toolbar)
+        .setIcon("chevron-down")
+        .setTooltip("Collapse/Expand all headings")
+        .setClass("toggle-all")
+        .onClick(() => {
+          
+          
+                const isAllExpanded = float_toc_dom.getAttribute("data-all-expanded") === "true";
+                toggleButton.setIcon(isAllExpanded ? "chevron-right" : "chevron-down");
+                // 使用新的 toggleAllHeadings 函数
+                toggleAllHeadings(float_toc_dom as HTMLElement, !isAllExpanded);
+                
+                // 更新全局状态
+                float_toc_dom.setAttribute("data-all-expanded", (!isAllExpanded).toString());
+                
+               
+            
+        });
+
+            if (!float_toc_dom.hasAttribute("has-events")) {
+        float_toc_dom.onmouseenter = function () {
+            toolbar?.removeClass("hide");
+            float_toc_dom.addClass("hover");
+        };
+        float_toc_dom.onmouseleave = function () {
+            toolbar?.addClass("hide");
+            float_toc_dom.removeClass("hover");
+        };
+        float_toc_dom.setAttribute("has-events", "true");
+    }
+
 }

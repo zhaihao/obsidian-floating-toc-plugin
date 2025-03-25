@@ -7,7 +7,7 @@ import {
 	HeadingCache,
 	App,
 } from "obsidian";
-import { creatToc, createLi, renderHeader } from "src/components/floatingtocUI";
+import { creatToc, createLi, renderHeader, createToolbar } from "src/components/floatingtocUI";
 import { FlotingTOCSettingTab } from "src/settings/settingsTab";
 import { FlotingTOCSetting, DEFAULT_SETTINGS } from "src/settings/settingsData";
 import { toggleCollapse, hasChildHeading } from "src/components/toggleCollapse";
@@ -25,158 +25,87 @@ export function selfDestruct() {
 		}
 	});
 }
-
+ 
 
 export function refresh_node(plugin: FloatingToc, view: MarkdownView) {
 	requireApiVersion("0.15.0")
 		? (activeDocument = activeWindow.document)
 		: (activeDocument = window.document);
-	//let currentleaf = activeDocument?.querySelector(".workspace-leaf.mod-active");
-	//let view=plugin.app.workspace.getActiveViewOfType(MarkdownView)
+
 	let float_toc_dom = view.contentEl?.querySelector(".floating-toc-div");
+	if (!float_toc_dom) return false;
+ 
+	let toolbar = float_toc_dom.querySelector(".toolbar");
+    if (!toolbar) {
+        toolbar = float_toc_dom.createEl("div");
+     
+        // 创建 toolbar 的内容移到这里
+        createToolbar(plugin, toolbar as HTMLElement, float_toc_dom as HTMLElement);
+    }
 
-	if (float_toc_dom) {
-		let ul_dom = float_toc_dom.querySelector(
-			"ul.floating-toc"
-		) as HTMLElement;
-		if (!ul_dom)
-			(ul_dom = float_toc_dom.createEl("ul")),
-				ul_dom.addClass("floating-toc");
-		let li_dom = float_toc_dom?.querySelectorAll("li.heading-list-item") as NodeListOf<HTMLElement>;
-		let headingdata = plugin.headingdata;
+	let ul_dom = float_toc_dom.querySelector("ul.floating-toc") as HTMLElement;
+	if (!ul_dom) {
+		ul_dom = float_toc_dom.createEl("ul");
+		ul_dom.addClass("floating-toc");
+	}
 
-		if (plugin.settings.ignoreHeaders) {
-			let levelsToFilter = plugin.settings.ignoreHeaders.split("\n");
-			headingdata = plugin.headingdata?.filter(
-				(item: { level: { toString: () => string } }) =>
-					!levelsToFilter.includes(item.level.toString())
-			);
-		}
+	// 1. 预处理 headingdata，避免重复过滤
+	let headingdata = plugin.headingdata;
+	if (plugin.settings.ignoreHeaders) {
+		const levelsToFilter = new Set(plugin.settings.ignoreHeaders.split("\n"));
+		headingdata = plugin.headingdata?.filter(
+			(item: { level: { toString: () => string } }) =>
+				!levelsToFilter.has(item.level.toString())
+		);
+	}
+	if (!headingdata) {
+		ul_dom.remove();
+		return false;
+	}
+  if (headingdata && headingdata.length > 0) {
+		plugin.updateTocWidth(float_toc_dom as HTMLElement, headingdata);
+    }
+	// 2. 创建一个 Map 存储现有的 li 元素，避免重复查询
+	const existingItems = new Map();
+	const li_dom = float_toc_dom?.querySelectorAll("li.heading-list-item") as NodeListOf<HTMLElement>;
+	li_dom.forEach((el) => {
+		const key = `${el.getAttribute("data-level")}-${el.getAttribute("data-line")}-${(el.children[0] as HTMLElement).innerText}`;
+		existingItems.set(key, el);
+	});
 
-		if (headingdata) {
-			if (li_dom.length >= headingdata.length) {
-				li_dom?.forEach((el, i) => {
-					if (headingdata[i]) {
-						if (
-							headingdata[i].level ==
-							el.getAttribute("data-level") &&
-							headingdata[i].heading ==
-							(el.children[0] as HTMLElement).innerText &&
-							headingdata[i].position.start.line ==
-							el.getAttribute("data-line")
-						) {
+	// 3. 使用 DocumentFragment 批量处理 DOM 操作
+	const fragment = document.createDocumentFragment();
+	let itemsToRemove = new Set(existingItems.values());
 
-							//级别，内容行号完全一致
+	// 4. 处理每个标题
+	headingdata.forEach((heading: HeadingCache, i: number) => {
+		const key = `${heading.level}-${heading.position.start.line}-${heading.heading}`;
+		const existingItem = existingItems.get(key);
 
-							const index = Number(el.getAttribute("data-id"));
-
-							if (hasChildHeading(index, plugin.headingdata)) {
-								{
-									if (!el.hasAttribute("iscollapsed")) {
-										el.setAttribute("isCollapsed", "false");
-									}
-								}
-							} else {
-								if (el.hasAttribute("iscollapsed")) {
-									el.removeAttribute("isCollapsed");
-								}
-							}
-
-							return;
-						} else {
-							el.setAttribute(
-								"data-level",
-								headingdata[i].level.toString()
-							);
-							el.setAttribute("data-id", i.toString());
-							el.setAttribute(
-								"data-line",
-								headingdata[i].position.start.line.toString()
-							);
-							el.children[0].querySelector("a")?.remove();
-
-							renderHeader(
-								plugin,
-								view,
-								headingdata[i].heading,
-								el.children[0] as HTMLElement,
-								view.file.path,
-								null
-							);
-							//(el.children[0] as HTMLElement).innerHTML = '<a class="text">' + headingdata[i].heading + '</a>'
-							// 如果有子标题则用属性标记，然后在css里用::before显示特殊符号
-						}
-					} else {
-						el.remove();
-					}
-				});
-			} else {
-				headingdata?.forEach((el: HeadingCache, i: number) => {
-					if (i <= li_dom.length - 1) {
-						if (
-							el.level.toString() ==
-							li_dom[i].getAttribute("data-level") &&
-							el.heading ==
-							(li_dom[i].children[0] as HTMLElement)
-								.innerText &&
-							el.position.start.line.toString() ==
-							li_dom[i].getAttribute("data-line")
-						) {
-							//级别，内容行号完全一致就不需要更新。
-
-							const index = Number(
-								li_dom[i].getAttribute("data-id")
-							);
-
-							if (hasChildHeading(index, plugin.headingdata)) {
-								if (!li_dom[i].hasAttribute("iscollapsed"))
-									li_dom[i].setAttribute(
-										"isCollapsed",
-										"false"
-									);
-
-							} else {
-								if (li_dom[i].hasAttribute("iscollapsed"))
-									li_dom[i].removeAttribute(
-										"isCollapsed"
-									);
-
-							}
-
-							return;
-						} else {
-							li_dom[i].setAttribute(
-								"data-level",
-								el.level.toString()
-							);
-							li_dom[i].setAttribute("data-id", i.toString());
-							li_dom[i].setAttribute(
-								"data-line",
-								el.position.start.line.toString()
-							);
-							//(li_dom[i].children[0] as HTMLElement).innerHTML = '<a class="text">' + el.heading + '</a>'
-							li_dom[i].children[0].querySelector("a")?.remove();
-
-							renderHeader(
-								plugin,
-								view,
-								el.heading,
-								li_dom[i].children[0] as HTMLElement,
-								view.file.path,
-								null
-							);
-						}
-					} else {
-						createLi(plugin, view, ul_dom, el, i);
-					}
-				});
+		if (existingItem) {
+			// 标题已存在且内容相同，只更新折叠状态
+			itemsToRemove.delete(existingItem);
+			if (hasChildHeading(i, plugin.headingdata)) {
+				if (!existingItem.hasAttribute("iscollapsed")) {
+					existingItem.setAttribute("isCollapsed", "false");
+				}
+			} else if (existingItem.hasAttribute("iscollapsed")) {
+				existingItem.removeAttribute("isCollapsed");
 			}
-			return true;
+			fragment.appendChild(existingItem);
 		} else {
-			ul_dom.remove();
-			return false;
+			// 创建新的标题项
+			createLi(plugin, view, fragment, heading, i);
 		}
-	} else return false;
+	});
+
+	// 5. 移除不再需要的项
+	itemsToRemove.forEach(item => item.remove());
+
+	// 6. 一次性更新 DOM
+	ul_dom.replaceChildren(fragment);
+
+	return true;
 }
 function siblingElems(elem: Element) {
 	var nodes = [];
@@ -205,7 +134,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 		const floattoc = view.contentEl.querySelector(".floating-toc");
 		if (!floattoc) return;
 		
-		// 缓存DOM查询结果
+		// 1. 缓存DOM查询结果
 		const headingItems = floattoc.querySelectorAll("li.heading-list-item");
 		if (!headingItems.length) return;
 		
@@ -215,7 +144,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 		const firstline = parseInt(firstHeadingItem.getAttribute("data-line") || "0");
 		const lastline = parseInt(lastHeadingItem.getAttribute("data-line") || "0");
 		
-		// 查找当前位置的标题
+		// 2. 使用二分查找代替线性搜索
 		let targetLine = 0;
 		let targetHeading = null;
 		
@@ -246,20 +175,20 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 			}
 		}
 		
-		// 更新UI
-		// 1. 移除之前的高亮
+		// 3. 优化DOM操作，减少重绘次数
+		// 移除之前的高亮
 		const prevLocation = floattoc.querySelector(".heading-list-item.located");
 		if (prevLocation) {
 			prevLocation.removeClass("located");
 		}
 		
-		// 2. 添加新的高亮
+		// 添加新的高亮
 		const curLocation = floattoc.querySelector(`li[data-line='${targetLine}']`) as HTMLElement;
 		if (!curLocation) return;
 		
 		curLocation.addClass("located");
 		
-		// 3. 更新焦点元素
+		// 4. 批量处理类名更新
 		const level = parseInt(curLocation.getAttribute("data-level") || "1");
 		const adjustedLevel = level > 1 ? level - 1 : 1;
 		
@@ -268,7 +197,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 			focusele.removeClass("focus");
 		}
 		
-		// 4. 查找并设置焦点元素
+		// 5. 减少DOM遍历
 		const siblings = siblingElems(curLocation);
 		for (let i = 0; i < siblings.length; i++) {
 			const element = siblings[i] as HTMLElement;
@@ -278,7 +207,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 			}
 		}
 		
-		// 5. 滚动到可见区域
+		// 6. 使用requestAnimationFrame优化滚动
 		requestAnimationFrame(() => {
 			curLocation.scrollIntoView({ block: "nearest", behavior: "smooth" });
 		});
@@ -288,6 +217,10 @@ export default class FloatingToc extends Plugin {
 	app: App;
 	settings: FlotingTOCSetting;
 	headingdata: any;
+    private isUpdating = false;
+    private lastRefreshTime = 0;
+    private readonly REFRESH_COOLDOWN = 200; // 刷新冷却时间
+    private currentFile: string | null = null;
 
 	async onload() {
 		requireApiVersion("0.15.0")
@@ -394,35 +327,38 @@ export default class FloatingToc extends Plugin {
 				dispatchEvent(new Event("refresh-toc"))
 			},
 		});
+ 
+ 	
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", () => {
-				let view = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (view) {
-					const current_file = this.app.workspace.getActiveFile();
-					let heading =
-						this.app.metadataCache.getFileCache(
-							current_file
-						).headings;
-					let cleanheading: HeadingCache[] = [];
-					heading?.map((item: HeadingCache) => {
-						item.heading = item.heading.replace(
-							/<\/?[\s\S]*?(?:".*")*>/g,
-							""
-						); // clean html tags
-						cleanheading.push(item);
-					});
-					this.headingdata = cleanheading;
+				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (!view) return;
 
-					if (this.settings.ignoreHeaders) {
-						let levelsToFilter =
-							this.settings.ignoreHeaders.split("\n");
-						this.headingdata = heading.filter(
-							(item) =>
-								!levelsToFilter.includes(item.level.toString())
-						);
-					}
-					refresh(view);
+				const newFile = view.file?.path;
+				if (newFile === this.currentFile) return; // 如果是同一个文件，跳过
+
+				this.currentFile = newFile;
+				const current_file = this.app.workspace.getActiveFile();
+				  // 如果没有文件或文件没有标题，清除目录并返回
+				  if (!current_file || !this.app.metadataCache.getFileCache(current_file)?.headings?.length) {
+                    this.headingdata = null;
+                    selfDestruct(); // 清除目录
+                    return;
+                }
+
+				let heading = this.app.metadataCache.getFileCache(current_file)?.headings;
+				if (!heading) 
+					return;
+		
+				this.headingdata = heading;
+
+				if (this.settings.ignoreHeaders) {
+					let levelsToFilter = this.settings.ignoreHeaders.split("\n");
+					this.headingdata = heading.filter(
+						(item) => !levelsToFilter.includes(item.level.toString())
+					);
 				}
+				refresh_outline(view, true); // 强制刷新
 			})
 		);
 		/* 		this.registerEvent(this.app.workspace.on("file-open", (file) => {
@@ -437,85 +373,70 @@ export default class FloatingToc extends Plugin {
 				}
 				)
 				); */
-		this.registerEvent(
-			this.app.metadataCache.on("changed", () => {
-				let view = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (view) {
-					const current_file = view.file;
-
-					let heading =
-						this.app.metadataCache.getFileCache(
-							current_file
-						).headings;
-					let cleanheading: HeadingCache[] = [];
-					heading?.map((item: HeadingCache) => {
-						item.heading = item.heading.replace(
-							/<\/?[\s\S]*?(?:".*")*>/g,
-							""
-						); // clean html tags
-						cleanheading.push(item);
-					});
-					let newheading = cleanheading?.map((item) => {
-						return (
-							item.level + item.heading + item.position.start.line
+				this.registerEvent(
+					this.app.metadataCache.on("changed", () => {
+						const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+						if (!view || view.file?.path !== this.currentFile) return;
+			
+						const current_file = view.file;
+						
+						let heading = this.app.metadataCache.getFileCache(current_file)?.headings;
+						// 如果文件不再有标题，清除目录
+						if (!heading?.length) {
+							this.headingdata = null;
+							selfDestruct();
+							return;
+						}
+			
+						// 在比较前标准化两边的标题，移除所有 Markdown 语法
+						const normalizedNewHeadings = heading.map(h => ({
+							...h,
+							heading: this.removeMarkdownSyntax(h.heading)
+						}));
+						
+						const normalizedOldHeadings = this.headingdata ? 
+							this.headingdata.map((h: HeadingCache) => ({
+								...h,
+								heading: this.removeMarkdownSyntax(h.heading)
+							})) : null;
+			
+						// 检查标题结构是否有实质性变化
+						const structuralChanges = this.hasStructuralHeadingChanges(
+							normalizedNewHeadings, 
+							normalizedOldHeadings
 						);
-					});
-					let newheadingdata = this.headingdata?.map(
-						(item: HeadingCache) => {
-							return (
-								item.level +
-								item.heading +
-								item.position.start.line
-							);
-						}
-					);
-					if (
-						JSON.stringify(newheadingdata) ==
-						JSON.stringify(newheading)
-					)
-						return; //标题结构行号没有变化不更新
-					else {
-						//	console.log("refresh")
-
-						this.headingdata = cleanheading;
-						if (this.settings.ignoreHeaders) {
-							let levelsToFilter =
-								this.settings.ignoreHeaders.split("\n");
-							this.headingdata = heading.filter(
-								(item) =>
-									!levelsToFilter.includes(
-										item.level.toString()
-									)
-							);
-						}
-						refresh(view);
-					}
-				}
-			})
-		);
-
-		const refresh_outline = (view: MarkdownView): any => {
-			updateHeadingsForView(view);
-		};
-		const refresh = (view: MarkdownView) =>
-			debounce(refresh_outline(view), 300, true);
-		/* 		this.registerEvent(
-					this.app.workspace.on("editor-change", (editor) => {
-						const activeView =
-							this.app.workspace.getActiveViewOfType(MarkdownView);
-						if (activeView) {
-							let resolved = false;
-							this.registerEvent(
-								this.app.metadataCache.on("resolve", (file) => {
-									if (activeView.file === file && !resolved) {
-										resolved = true;
-										updateHeadingsForView();
-									}
-								})
-							);
+			
+						// 只有结构变化时才重建大纲
+						if (structuralChanges) {
+							this.headingdata = heading;
+						
+							if (this.settings.ignoreHeaders) {
+								let levelsToFilter = this.settings.ignoreHeaders.split("\n");
+								this.headingdata = heading.filter(
+									(item) => !levelsToFilter.includes(item.level.toString())
+								);
+							}
+							
+							// 完全重建大纲
+							refresh_outline(view, true);
+						} else {
+							// 只更新大纲中的行号信息，不重建结构
+							this.updateOutlineLineNumbers(view, heading);
 						}
 					})
-				); */
+				);
+
+		     // 修改原有的 refresh 函数定义
+		const refresh_outline = (view: MarkdownView, force = false): any => {
+			const now = Date.now();
+			if (!force && now - this.lastRefreshTime < this.REFRESH_COOLDOWN) {
+				return; // 在冷却时间内，除非强制刷新，否则跳过
+			}
+			this.lastRefreshTime = now;
+			updateHeadingsForView(view);
+		};
+	
+		 
 
 		activeDocument.addEventListener(
 			"scroll",
@@ -531,6 +452,7 @@ export default class FloatingToc extends Plugin {
 		);
 		
 			this.app.workspace.on("window-open", (leaf) => {
+				console.log("window-open")
 				leaf.doc.addEventListener(
 					"scroll",
 					(event) => {
@@ -546,8 +468,141 @@ export default class FloatingToc extends Plugin {
 		});
 	}
 
+	public updateTocWidth =  debounce((float_toc_dom: HTMLElement, headingdata: HeadingCache[]) => {
+	    // 18rem大约对应20个中文字符或30个英文字符
+		
+    
+		// 快速估算最长标题的字符长度
+		const maxLength = headingdata.reduce((maxLen, heading) => {
+			// 快速估算实际显示长度
+			const text = heading.heading;
+			// 计算等效字符长度：中文算1，英文和数字算0.6
+			const effectiveLength = text.split('')
+				.reduce((len, char) => {
+					return len + (/[\u4e00-\u9fa5]/.test(char) ? 1 : 0.6);
+				}, 0);
+			
+	 
+			// 返回最大长度
+			return Math.max(maxLen, effectiveLength );
+		}, 0);
+		
+	
+	
+		const maxTextWidth = Math.ceil(maxLength) + 'rem'; 
+		document.body.style.setProperty('--actual-toc-width', `${maxTextWidth}`);
+	   
+	}, 100);
+
+	private removeMarkdownSyntax(heading: string): string {
+		if (!heading) return "";
+		
+		// 分步处理不同类型的 Markdown 语法
+		let cleanedHeading = heading;
+		
+		// 1. 处理粗体和斜体
+		cleanedHeading = cleanedHeading
+			.replace(/\*\*(.*?)\*\*/g, "$1")    // 粗体 **text**
+			.replace(/__(.*?)__/g, "$1")        // 粗体 __text__
+			.replace(/\*(.*?)\*/g, "$1")        // 斜体 *text*
+			.replace(/_(.*?)_/g, "$1");         // 斜体 _text_
+		
+		// 2. 处理代码和删除线
+		cleanedHeading = cleanedHeading
+			.replace(/`([^`]+)`/g, "$1")        // 行内代码 `code`
+			.replace(/~~(.*?)~~/g, "$1");       // 删除线 ~~text~~
+		
+		// 3. 处理高亮
+		cleanedHeading = cleanedHeading
+			.replace(/==(.*?)==/g, "$1");       // 高亮 ==text==
+		
+		// 4. 处理链接
+		cleanedHeading = cleanedHeading
+			.replace(/\[(.*?)\]\([^\)]+\)/g, "$1")  // [text](url)
+			.replace(/\[\[(.*?)(\|.*?)?\]\]/g, "$1"); // Wiki链接 [[page|text]]
+		
+		// 5. 处理HTML标签
+		cleanedHeading = cleanedHeading
+			.replace(/<[^>]+>/g, "");           // HTML标签
+		
+		// 6. 移除标题标记符号
+		cleanedHeading = cleanedHeading
+			.replace(/^#+\s+/, "");             // 标题前的 # 符号
+		
+		return cleanedHeading.trim();
+	}
+    // 添加辅助方法来比较标题是否发生变化
+	private hasHeadingsChanged(newHeadings: HeadingCache[], oldHeadings: HeadingCache[]): boolean {
+        if (!oldHeadings || newHeadings.length !== oldHeadings.length) return true;
+
+        const normalizeHeading = (h: HeadingCache) => 
+            `${h.heading}|${h.level}|${h.position.start.line}`;
+
+           // 使用 every 而不是 some，这样更容易调试
+		   const isUnchanged = newHeadings.every((newH, index) => {
+            const oldH = oldHeadings[index];
+            const newNormalized = normalizeHeading(newH);
+            const oldNormalized = normalizeHeading(oldH);
+            return newNormalized === oldNormalized;
+        });
+
+        // if (!isUnchanged) {
+        //     console.log("Headings changed:", {
+        //         old: oldHeadings.map(normalizeHeading),
+        //         new: newHeadings.map(normalizeHeading)
+        //     });
+        // }
+
+        return !isUnchanged;
+    }
+	private updateOutlineLineNumbers(view: MarkdownView, newHeadings: HeadingCache[]) {
+		const float_toc_dom = view.contentEl?.querySelector(".floating-toc-div");
+		if (!float_toc_dom) return;
+
+		const li_items = float_toc_dom.querySelectorAll("li.heading-list-item") as NodeListOf<HTMLElement>;
+		if (!li_items.length) return;
+
+		// 创建一个标题文本到行号的映射
+		const headingToLineMap = new Map();
+		newHeadings.forEach(h => {
+			const key = `${this.removeMarkdownSyntax(h.heading)}|${h.level}`;
+			headingToLineMap.set(key, h.position.start.line);
+		});
+
+		// 只更新每个列表项的行号属性
+		li_items.forEach(li => {
+			const level = li.getAttribute("data-level");
+			const textEl = li.querySelector(".text-wrap a.text") as HTMLElement;
+			if (!textEl) return;
+			
+			const text = textEl.innerText;
+			const key = `${text}|${level}`;
+			
+			if (headingToLineMap.has(key)) {
+				const newLine = headingToLineMap.get(key);
+				// 只在行号变化时更新
+				if (li.getAttribute("data-line") !== newLine.toString()) {
+					li.setAttribute("data-line", newLine.toString());
+				}
+			}
+		});
+	}
+	private hasStructuralHeadingChanges(newHeadings: HeadingCache[], oldHeadings: HeadingCache[]): boolean {
+		if (!oldHeadings || newHeadings.length !== oldHeadings.length) return true;
+
+		// 只比较标题文本和级别，不比较行号
+		const normalizeForStructureCheck = (h: HeadingCache) => 
+			`${this.removeMarkdownSyntax(h.heading)}|${h.level}`;
+
+		// 检查标题内容或级别是否有变化
+		return newHeadings.some((newH, index) => {
+			const oldH = oldHeadings[index];
+			return normalizeForStructureCheck(newH) !== normalizeForStructureCheck(oldH);
+		});
+	}
+
 	handleScroll = (app: App, plugin: FloatingToc, evt: Event) =>
-		debounce(_handleScroll(app, plugin, evt), 200);
+		debounce(_handleScroll(app, plugin, evt), 100);
 
 	onunload() {
 		requireApiVersion("0.15.0")
