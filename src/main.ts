@@ -74,7 +74,7 @@ export function refresh_node(plugin: FloatingToc, view: MarkdownView) {
 	});
 
 	// 3. 使用 DocumentFragment 批量处理 DOM 操作
-	const fragment = document.createDocumentFragment();
+	const fragment = activeDocument.createDocumentFragment();
 	let itemsToRemove = new Set(existingItems.values());
 
 	// 4. 处理每个标题
@@ -221,7 +221,15 @@ export default class FloatingToc extends Plugin {
     private lastRefreshTime = 0;
     private readonly REFRESH_COOLDOWN = 200; // 刷新冷却时间
     private currentFile: string | null = null;
-
+	public  BAR_STYLE_CLASSES = [
+		"default-bar-style",
+		"enable-bar-icon",
+		"enable-bold-bar",
+		"enable-dot-style",
+		"enable-square-style",
+		"enable-vertical-line-style",
+		"enable-hollow-line-style",
+	  ];
 	async onload() {
 		requireApiVersion("0.15.0")
 			? (activeDocument = activeWindow.document)
@@ -490,7 +498,7 @@ export default class FloatingToc extends Plugin {
 	
 	
 		const maxTextWidth = Math.ceil(maxLength) + 'rem'; 
-		document.body.style.setProperty('--actual-toc-width', `${maxTextWidth}`);
+		activeDocument.body.style.setProperty('--actual-toc-width', `${maxTextWidth}`);
 	   
 	}, 100);
 
@@ -589,7 +597,7 @@ export default class FloatingToc extends Plugin {
 	}
 	private hasStructuralHeadingChanges(newHeadings: HeadingCache[], oldHeadings: HeadingCache[]): boolean {
 		if (!oldHeadings || newHeadings.length !== oldHeadings.length) return true;
-
+	 
 		// 只比较标题文本和级别，不比较行号
 		const normalizeForStructureCheck = (h: HeadingCache) => 
 			`${this.removeMarkdownSyntax(h.heading)}|${h.level}`;

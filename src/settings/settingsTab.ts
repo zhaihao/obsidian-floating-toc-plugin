@@ -56,7 +56,7 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
     const tabContent = tabContainer.createEl("div", { cls: "floating-toc-tab-content" });
 
     // 创建标签页
-    const tabs = ["TOC Display", "Interaction", "Style Settings"];
+    const tabs = ["🎢TOC Display", "🎮Interaction", "🎨Style Settings"];
     const tabElements: { [key: string]: HTMLElement } = {};
     
     tabs.forEach((tabName) => {
@@ -214,9 +214,14 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
       .setDesc(t("Choose the style of the indicator bar"))
       .addDropdown(dropdown => {
         dropdown
-          .addOption("default-bar-style", t("Default"))
-          .addOption("enable-bar-icon", t("Icon"))
-          .addOption("enable-bold-bar", t("Bold"))
+        .addOption("default-bar-style", "Default")
+        .addOption("enable-bar-icon", "Icon")
+        .addOption("enable-bold-bar", "Bold")
+        .addOption("enable-dot-style", "Dot")
+        .addOption("enable-square-style", "Square")
+        .addOption("enable-vertical-line-style", "Vertical Line")
+        .addOption("enable-hollow-line-style", "Hollow Line")
+
           .setValue(this.plugin.settings.barStyle)
           .onChange((value) => {
             this.plugin.settings.barStyle = value;

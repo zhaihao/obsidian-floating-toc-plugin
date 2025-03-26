@@ -299,7 +299,7 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 const initialBatch = plugin.headingdata.slice(0, initialBatchSize);
 
                 // 创建一个加载指示器
-                const loadingIndicator = document.createElement("div");
+                const loadingIndicator = activeDocument.createElement("div");
                 loadingIndicator.className = "toc-loading-indicator";
                 loadingIndicator.textContent = `Loading... (${initialBatchSize}/${totalHeadings})`;
                 loadingIndicator.style.textAlign = "center";
@@ -387,16 +387,17 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 if (plugin.settings.isDefaultHide)
                     floatingTocWrapper.addClass("hide");
                 if (plugin.settings.enableHeadingNowrap)
-                    document.body.addClass("enable-heading-nowrap");
+                    activeDocument.body.addClass("enable-heading-nowrap");
                 if (plugin.settings.enableBarHeadingText)
-                    document.body.addClass("enable-bar-heading-text");
+                    activeDocument.body.addClass("enable-bar-heading-text");
                 
-                // 移除所有可能的指示条样式类名
-                document.body.removeClass("default-bar-style");
-                document.body.removeClass("enable-bar-icon");
-                document.body.removeClass("enable-bold-bar");
+               // 移除所有可能的指示条样式类名
+               plugin.BAR_STYLE_CLASSES.forEach(className => {
+                activeDocument.body.removeClass(className);
+              });
+
                 // 添加当前选择的指示条样式类名
-                document.body.addClass(plugin.settings.barStyle);
+                activeDocument.body.addClass(plugin.settings.barStyle);
                 
                 genToc(view.contentEl, floatingTocWrapper);
                 plugin.updateTocWidth(floatingTocWrapper as HTMLElement, plugin.headingdata);
