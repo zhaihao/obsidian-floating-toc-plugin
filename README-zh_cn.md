@@ -6,7 +6,7 @@
 重构插件，使得插件体积大幅度减少（只有原来的三十分之一），功能增加，性能提高。
 
 
- ![](https://raw.githubusercontent.com/cumany/cumany/main/pic/202209171712621.gif)
+![floating toc](https://github.com/user-attachments/assets/b64c3add-b285-4756-8d74-58a872caf958)
 
 ## 交流群
  有问题 在群里反馈：QQ 825255377
