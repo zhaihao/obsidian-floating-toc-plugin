@@ -29,6 +29,6 @@ export const DEFAULT_SETTINGS: FlotingTOCSetting = {
   expandAllSubheadings: false,
   isDefaultHide: false,
   enableHeadingNowrap: false,
-  barStyle: "default-bar-style",
+  barStyle: "enable-edge-style",
   enableBarHeadingText: false,
 };

@@ -395,9 +395,9 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                plugin.BAR_STYLE_CLASSES.forEach(className => {
                 activeDocument.body.removeClass(className);
               });
-
+   
                 // 添加当前选择的指示条样式类名
-                activeDocument.body.addClass(plugin.settings.barStyle);
+                activeDocument.body.addClass(plugin.settings.barStyle || "enable-edge-style");
                 
                 genToc(view.contentEl, floatingTocWrapper);
                 plugin.updateTocWidth(floatingTocWrapper as HTMLElement, plugin.headingdata);

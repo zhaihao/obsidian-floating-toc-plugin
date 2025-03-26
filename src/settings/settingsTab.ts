@@ -83,7 +83,7 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
     
     
     // 目录显示设置
-    const tocDisplay = tabElements["TOC Display"];
+    const tocDisplay = tabElements["🎢TOC Display"];
     tocDisplay.createEl("h2", { text: t("TOC Display Settings") });
 
     let posE1 = new Setting(tocDisplay)
@@ -168,7 +168,7 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
     });
 
     // 交互设置
-    const interaction = tabElements["Interaction"];
+    const interaction = tabElements["🎮Interaction"];
     interaction.createEl("h2", { text: t("Interaction Settings") });
 
     new Setting(interaction)
@@ -194,7 +194,7 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
         }));
 
     // 样式设置
-    const styleSettings = tabElements["Style Settings"];
+    const styleSettings = tabElements["🎨Style Settings"];
     styleSettings.createEl("h2", { text: t("Style Settings") });
 
     new Setting(styleSettings)
@@ -215,6 +215,7 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
       .addDropdown(dropdown => {
         dropdown
         .addOption("default-bar-style", "Default")
+        .addOption("enable-edge-style", "Edge")
         .addOption("enable-bar-icon", "Icon")
         .addOption("enable-bold-bar", "Bold")
         .addOption("enable-dot-style", "Dot")

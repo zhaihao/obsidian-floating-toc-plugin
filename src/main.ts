@@ -223,6 +223,7 @@ export default class FloatingToc extends Plugin {
     private currentFile: string | null = null;
 	public  BAR_STYLE_CLASSES = [
 		"default-bar-style",
+		"enable-edge-style",
 		"enable-bar-icon",
 		"enable-bold-bar",
 		"enable-dot-style",
