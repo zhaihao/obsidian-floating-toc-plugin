@@ -1,5 +1,39 @@
 # Changelog
 
+## Floating TOC 2.6.1 重装升级
+
+### 核心架构改进
+- **设置页重构**：核心设置不再依赖 Style Setting 插件，提升独立性和稳定性
+- **性能优化**：大文档加载机制改进，显著提升目录创建效率
+
+### 新增样式选项
+新增多种浮动目录视觉样式，可通过以下开关控制：
+- `default-bar-style` - 默认条状样式
+- `enable-edge-style` - 边缘贴合样式（Dropbox风格）
+- `enable-bar-icon` - 显示条状图标
+- `enable-bold-bar` - 加粗条状样式
+- `enable-dot-style` - 圆点样式
+- `enable-square-style` - 方形样式
+- `enable-vertical-line-style` - 垂直线样式
+- `enable-hollow-line-style` - 空心线样式
+
+### 交互功能增强
+- **一键折叠按钮**：新增快速折叠/展开全部标题的功能
+- **自动隐藏**：增加启动时自动隐藏 Floating TOC 的设置选项
+- **悬停灵敏度**：优化 hover 触发逻辑，减少误触发
+- **隐藏控制**：支持通过 `cssclass hide-floating-toc` 在特定笔记中隐藏 TOC
+
+## 实用功能优化
+- **复制 TOC 改进**：
+  - 复制的目录结果现在是双链可导航形式
+  - 与 Better PDF Export 插件配合可导出带导航目录的文档
+- **宽度自适应**：
+  - 智能判断标题长度，短标题不再占用多余空间
+- **配色系统**：
+  - 默认使用主题配色
+  - 仍支持通过 Style Setting 进行个性化配色
+
+ 如何调整为sspai风格： 浮动位置选择 left, 目录标题单行显示，指示条样式bold，在指示条旁边显示标题上下级。
 ## 2.6.0 (2025-03-25)
 ### 增加一键折叠按钮，优化大文档加载性能
 修改复制标题功能为复制TOC目录
