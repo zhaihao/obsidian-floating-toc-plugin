@@ -152,12 +152,6 @@ settings:
         level: 2
         collapsed: true
     -  
-        id: enable-heading-nowrap
-        title:  Header single line display
-        title.zh: 目录标题单行显示
-        type: class-toggle
-        default: false
-    -  
         id: floating-toc-font-size
         title: font size
         title.zh: 字体大小
@@ -223,29 +217,6 @@ settings:
           - 
             label: line
             value: float-outline-style
-    -  
-        id: enable-bar-style
-        title: enable bar style
-        title.zh: 指示条样式
-        type: class-select
-        allowEmpty: false
-        default: default-bar-style
-        options:
-          - 
-            label: Default
-            value: default-bar-style
-          - 
-            label: Icon
-            value: enable-bar-icon
-          - 
-            label: bold
-            value: enable-bold-bar
-    -
-        id: enable-bar-heading-text
-        title:  Show heading text next to indicator bar (including parent)
-        title.zh: 在指示条旁边显示标题上下级
-        type: class-toggle
-        default: false
     - 
         id: focus-heading
         title: Focus on the current heading
@@ -500,34 +471,34 @@ body.enable-bold-bar .heading-list-item .text-wrap {
   margin-left: unset!important;
 }
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="1"] .heading-rendered::before,
-body.enable-bold-bar .floating-toc-div.hover .heading-list-item[data-level="1"] .heading-rendered::before 
+body.enable-bold-bar .floating-toc-div:hover .heading-list-item[data-level="1"] .heading-rendered::before 
 {
   margin-left: 1.2rem;
 }
  
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="2"] .heading-rendered::before,
-body.enable-bold-bar .floating-toc-div.hover .heading-list-item[data-level="2"] .heading-rendered::before 
+body.enable-bold-bar .floating-toc-div:hover .heading-list-item[data-level="2"] .heading-rendered::before 
 {
   margin-left: 1.5rem;
 }
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="3"] .heading-rendered::before,
-body.enable-bold-bar .floating-toc-div.hover .heading-list-item[data-level="3"] .heading-rendered::before 
+body.enable-bold-bar .floating-toc-div:hover .heading-list-item[data-level="3"] .heading-rendered::before 
 {
   margin-left: 2rem;
 }
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="4"] .heading-rendered::before,
-body.enable-bold-bar .floating-toc-div.hover .heading-list-item[data-level="4"] .heading-rendered::before 
+body.enable-bold-bar .floating-toc-div:hover .heading-list-item[data-level="4"] .heading-rendered::before 
 {
   margin-left: 2.5rem;
 } 
 
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="5"] .heading-rendered::before,
-body.enable-bold-bar .floating-toc-div.hover .heading-list-item[data-level="5"] .heading-rendered::before 
+body.enable-bold-bar .floating-toc-div:hover .heading-list-item[data-level="5"] .heading-rendered::before 
 {
   margin-left: 3rem;
 }
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item[data-level="6"] .heading-rendered::before,
-body.enable-bold-bar .floating-toc-div.hover .heading-list-item[data-level="6"] .heading-rendered::before 
+body.enable-bold-bar .floating-toc-div:hover .heading-list-item[data-level="6"] .heading-rendered::before 
 {
   margin-left: 3.5rem;
 }
@@ -669,7 +640,7 @@ body.enable-bold-bar .heading-list-item:hover .line-wrap .line
 }
 
 body.enable-bold-bar .floating-toc-div.pin .heading-list-item>.line-wrap,
-body.enable-bold-bar .floating-toc:hover .heading-list-item>.line-wrap {
+body.enable-bold-bar .floating-toc-div:hover .heading-list-item>.line-wrap {
   display: block;
 
 }
@@ -705,10 +676,11 @@ body.enable-bold-bar .floating-toc:hover .heading-list-item>.line-wrap {
   min-height: auto;
   height: fit-content;
   z-index: 2;
+  transition: all var(--floating-toc-response-time) ease-out;
 }
 
 .floating-toc-div.pin .floating-toc,
-.floating-toc:hover {
+.floating-toc-div:hover .floating-toc {
   z-index: 2;
   align-items: flex-start;
   min-width: 6rem;
@@ -716,6 +688,8 @@ body.enable-bold-bar .floating-toc:hover .heading-list-item>.line-wrap {
   width: auto;
   overflow-y: auto;
   background: var(--floating-toc-background-color);
+  transition-delay: var(--floating-toc-response-time);
+  
  }
 
 .floating-toc-div.pin .floating-toc {
@@ -723,25 +697,27 @@ body.enable-bold-bar .floating-toc:hover .heading-list-item>.line-wrap {
 }
 
 .floating-toc-div.pin .floating-toc::-webkit-scrollbar,
-.floating-toc:hover::-webkit-scrollbar {
+.floating-toc-div:hover .floating-toc::-webkit-scrollbar {
   display: none;
 }
 
 
 body:not(.enable-heading-nowrap) .floating-toc-div.pin .floating-toc .heading-list-item,
-body:not(.enable-heading-nowrap) .floating-toc:hover .heading-list-item {
+body:not(.enable-heading-nowrap) .floating-toc-div:hover .floating-toc .heading-list-item {
   min-height: auto;
 }
 
-.floating-toc-div:is(.hover, .pin) .floating-toc .heading-list-item {
+.floating-toc-div:is(:hover, .pin) .floating-toc .heading-list-item {
   padding: 0 1rem;
+ 
 }
-.floating-toc-div:is(.hover, .pin) .floating-toc{
+.floating-toc-div:is(:hover, .pin) .floating-toc{
   min-height: auto;
   height: fit-content;
   border: 1px solid var(--background-modifier-border);
+  transition-delay: var(--floating-toc-response-time);
 }
-.floating-toc-div:is(.hover, .pin) .floating-toc:empty{
+.floating-toc-div:is(:hover, .pin) .floating-toc:empty{
   display: none;
 }
 
@@ -750,12 +726,12 @@ body:not(.enable-heading-nowrap) .floating-toc:hover .heading-list-item {
 }
 
 body.enable-heading-nowrap .floating-toc-div.pin .floating-toc .heading-list-item>.text-wrap,
-body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
+body.enable-heading-nowrap .floating-toc-div:hover .floating-toc .heading-list-item>.text-wrap {
   white-space: nowrap;
 }
 
 .floating-toc-div.pin .floating-toc .heading-list-item>.text-wrap,
-.floating-toc:hover .heading-list-item>.text-wrap {
+.floating-toc-div:hover .floating-toc .heading-list-item>.text-wrap {
   /* min-width: 12rem; */
   white-space: normal;
   opacity: 1;
@@ -769,9 +745,8 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
 
 
 .floating-toc-div.pin .heading-list-item>.line-wrap,
-.floating-toc:hover .heading-list-item>.line-wrap {
-  display: none;
-
+.floating-toc-div:hover .heading-list-item>.line-wrap {
+display: none;
 }
 
 /* .workspace-leaf-content .floating-toc-div.pin:is(.floating-left,.floating-both)+.markdown-source-view .cm-editor {
@@ -789,6 +764,8 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
   padding-left: min(var(--floating-toc-line-width), var(--actual-toc-width));
 }
 
+
+
 .workspace-leaf-content .floating-toc-div.pin:is(.floating-left, .floating-both)~.markdown-reading-view {
   padding-left: min(var(--floating-toc-line-width), var(--actual-toc-width));
 }
@@ -797,19 +774,26 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
   padding-left: 4rem;
 }
 
+.workspace-leaf-content .floating-toc-div.pin.floating-right +.markdown-source-view>.cm-editor .cm-contentContainer {
+  padding-right: calc(min(var(--floating-toc-line-width), var(--actual-toc-width)) - 2rem);
+}
+.workspace-leaf-content .floating-toc-div.pin.floating-right~.markdown-reading-view .markdown-preview-sizer {
+  padding-right: calc(min(var(--floating-toc-line-width), var(--actual-toc-width)) - 2rem);
+}
+
 .floating-toc-div:is(.floating-left, .floating-both)+.markdown-source-view .cm-panels {
   margin-left: -2rem;
 }
 
 /****right*********/
 .floating-toc-div.pin .floating-toc .heading-list-item>.text-wrap a>a,
-.floating-toc-div .floating-toc:hover .heading-list-item>.text-wrap a>a {
+.floating-toc-div:hover .floating-toc .heading-list-item>.text-wrap a>a {
 
   pointer-events: none;
 }
 
 .floating-toc-div.pin .floating-toc .heading-list-item>.text-wrap a>a.external-link,
-.floating-toc-div .floating-toc:hover .heading-list-item>.text-wrap a>a.external-link {
+.floating-toc-div:hover .floating-toc .heading-list-item>.text-wrap a>a.external-link {
 
   background-image: none;
 }
@@ -821,7 +805,8 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
 
 }
 
-.floating-toc-div.floating-right .floating-toc {
+.floating-toc-div.floating-right .floating-toc,
+.floating-toc-div.floating-right .toolbar {
   right: calc(0.5rem + var(--floating-toc-position));
   align-items: flex-end;
   left: unset;
@@ -861,7 +846,7 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
 }
 
 .floating-toc-div.floating-right.pin .floating-toc .heading-list-item>.text-wrap,
-.floating-toc-div.floating-right .floating-toc:hover .heading-list-item>.text-wrap {
+.floating-toc-div.floating-right:hover .floating-toc .heading-list-item>.text-wrap {
   justify-content: flex-end;
   text-align: right;
   display: inline-flex;
@@ -920,7 +905,7 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
   }
 }
 
-.floating-toc-div:not(.pin) .toolbar.hide {
+.floating-toc-div:not(:is(:hover, .pin)) .toolbar {
   display: none;
 }
 
@@ -967,27 +952,27 @@ body.enable-heading-nowrap .floating-toc:hover .heading-list-item>.text-wrap {
 }
 
 
-body.enable-background-blur-dept .workspace-leaf-content .floating-toc-div.hover:not(.pin)+.markdown-source-view>.cm-editor {
+body.enable-background-blur-dept .workspace-leaf-content .floating-toc-div:hover:not(.pin)+.markdown-source-view>.cm-editor {
 
   filter: blur(var(--background-blur-depth));
   -webkit-filter: blur(var(--background-blur-depth));
   background: var(--floating-toc-background-color);
 }
 
-body.enable-background-blur-dept .workspace-leaf-content .floating-toc-div.hover:not(.pin)~.markdown-reading-view .markdown-preview-view {
+body.enable-background-blur-dept .workspace-leaf-content .floating-toc-div:hover:not(.pin)~.markdown-reading-view .markdown-preview-view {
   filter: blur(var(--background-blur-depth));
   -webkit-filter: blur(var(--background-blur-depth));
   background: var(--floating-toc-background-color);
 }
 
-body.enable-background-blur-dept .floating-toc-div.hover:not(.pin) .heading-list-item .text-wrap:not(.located) .text {
+body.enable-background-blur-dept .floating-toc-div:hover:not(.pin) .heading-list-item .text-wrap:not(.located) .text {
   background: transparent;
 
 
 }
 
 body.enable-background-blur-dept .floating-toc-div.pin .floating-toc,
-body.enable-background-blur-dept .floating-toc:hover {
+body.enable-background-blur-dept .floating-toc-div:hover .floating-toc {
   background: transparent;
 }
 
@@ -1004,12 +989,23 @@ body.enable-background-blur-dept .floating-toc:hover {
 }
 
 .floating-toc-div.floating-right.alignLeft.pin .floating-toc .heading-list-item>.text-wrap,
-.floating-toc-div.floating-right.alignLeft .floating-toc:hover .heading-list-item>.text-wrap {
+.floating-toc-div.floating-right.alignLeft:hover .floating-toc .heading-list-item>.text-wrap {
   max-width: 12rem;
   text-overflow: ellipsis;
   justify-content: flex-start;
 
   text-align: left;
+  .floating-toc-div.pin .floating-toc .heading-list-item>.text-wrap, .floating-toc-div:hover .floating-toc .heading-list-item>.text-wrap {
+    /* min-width: 12rem; */
+    white-space: normal;
+    opacity: 1;
+    transition-delay: var(--floating-toc-response-time);
+    transition-property: width;
+    transition-timing-function: ease-in-out;
+    -webkit-transition-delay: var(--floating-toc-response-time);
+    -webkit-transition-property: width;
+    -webkit-transition-timing-function: ease-in-out;
+}
 }
 
 
@@ -1031,7 +1027,7 @@ heading-list-item.focus .text {
   font-weight: bold;
 }
 
-.floating-toc-div:not(:is(.hover, .pin)) .heading-list-item {
+.floating-toc-div:not(:is(:hover, .pin)) .heading-list-item {
   width: 2rem;
   overflow: hidden;
   margin-left: var(--indicator-bar-position);
@@ -1040,9 +1036,10 @@ heading-list-item.focus .text {
 
 .floating-toc-div:hover .heading-list-item {
   width: unset;
+ 
 }
 
-.floating-toc-div:not(:is(.hover)) .heading-list-item:not(:is(.located, .focus)) {
+.floating-toc-div:not(:is(:hover)) .heading-list-item:not(:is(.located, .focus)) {
   opacity: var(--focus-heading);
 }
 
@@ -1052,19 +1049,20 @@ heading-list-item.focus .text {
 body.enable-bold-bar  .heading-list-item{
   padding-left: 0.5rem;
 }
-body.enable-bold-bar .floating-toc-div:is(.hover, .pin) .floating-toc .heading-list-item
+body.enable-bold-bar .floating-toc-div:is(:hover, .pin) .floating-toc .heading-list-item
 {
   padding-left: 0.5rem;
+ 
 }
-body.enable-bar-heading-text .floating-toc-div:not(:is(.hover, .pin)) .heading-list-item:is(.located, .focus) {
+body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .heading-list-item:is(.located, .focus) {
   width: unset;
   overflow: visible;
 }
-body.enable-bar-heading-text .floating-toc-div:not(:is(.hover, .pin)) .floating-toc{
+body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .floating-toc{
   width: 2rem;
   overflow: visible;
 }
-body.enable-bar-heading-text .floating-toc-div:not(:is(.hover, .pin)) .heading-list-item:is(.located, .focus) .text-wrap {
+body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .heading-list-item:is(.located, .focus) .text-wrap {
   opacity: 1;
   
 }
@@ -1072,7 +1070,7 @@ body.enable-bar-heading-text .heading-list-item:is(.located, .focus) .text-wrap 
  background-color: var(--background-secondary);
 }
 
-body.enable-bar-heading-text .floating-toc-div:not(:is(.hover, .pin)) .heading-list-item:is(.located, .focus) .text-wrap .text {
+body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .heading-list-item:is(.located, .focus) .text-wrap .text {
   max-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1080,7 +1078,7 @@ body.enable-bar-heading-text .floating-toc-div:not(:is(.hover, .pin)) .heading-l
   color: var(--text-normal);
 }
 
-body.enable-bar-heading-text .floating-toc-div:not(:is(.hover, .pin)) .heading-list-item:is(.located, .focus) .text-wrap .text::before {
+body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .heading-list-item:is(.located, .focus) .text-wrap .text::before {
   content: '';
   margin-left: 0.2rem;
 }
@@ -1114,7 +1112,8 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 }
 
 
-.workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both .floating-toc {
+.workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both .floating-toc,
+.workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both .toolbar{
   right: calc(0.5rem + var(--floating-toc-position));
   align-items: flex-end;
   left: unset;
@@ -1154,10 +1153,11 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 }
 
 .workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both.pin .floating-toc .heading-list-item>.text-wrap,
-.workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both .floating-toc:hover .heading-list-item>.text-wrap {
+.workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both:hover .floating-toc .heading-list-item>.text-wrap {
   justify-content: flex-end;
   text-align: right;
   display: inline-flex;
+ 
 }
 
 .workspace-split.mod-vertical .workspace-tabs~.workspace-tabs .floating-toc-div.floating-both~.markdown-reading-view {
@@ -1177,11 +1177,12 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
   padding-right: 4rem;
 }
 
-.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both.alignLeft.hover .floating-toc {
+.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both.alignLeft:hover .floating-toc {
   align-items: flex-start;
 }
 
-.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both .floating-toc {
+.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both .floating-toc,
+.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both .toolbar {
   right: calc(0.5rem + var(--floating-toc-position));
   align-items: flex-end;
   left: unset;
@@ -1198,7 +1199,7 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 
 
 .workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both.pin .floating-toc .heading-list-item>.text-wrap,
-.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both .floating-toc:hover .heading-list-item>.text-wrap {
+.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both:hover .floating-toc .heading-list-item>.text-wrap {
   justify-content: flex-end;
   text-align: right;
   display: inline-flex;
@@ -1250,7 +1251,7 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 }
 
 .workspace-split.mod-vertical .workspace-tabs~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both.pin .floating-toc .heading-list-item>.text-wrap,
-.workspace-split.mod-vertical .workspace-tabs~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both .floating-toc:hover .heading-list-item>.text-wrap {
+.workspace-split.mod-vertical .workspace-tabs~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both:hover .floating-toc .heading-list-item>.text-wrap {
   justify-content: flex-end;
   text-align: right;
   display: inline-flex;
@@ -1260,16 +1261,18 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 
 /**两个垂直分割 水平分割的tabs*/
 
-.workspace-split.mod-horizontal~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both .floating-toc {
+.workspace-split.mod-horizontal~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both .floating-toc,
+.workspace-split.mod-horizontal~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both .toolbar {
   right: calc(0.5rem + var(--floating-toc-position));
   align-items: flex-end;
   left: unset;
 }
 
-.workspace-split.mod-horizontal~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both:is(.pin, .hover) .floating-toc {
+.workspace-split.mod-horizontal~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both:is(.pin, :hover) .floating-toc {
   right: calc(-2.5rem + var(--floating-toc-position));
   align-items: unset;
   left: unset;
+ 
 }
 
 .workspace-split.mod-vertical~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both .heading-list-item {
@@ -1306,7 +1309,7 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 }
 
 .workspace-split.mod-vertical~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both.pin .floating-toc .heading-list-item>.text-wrap,
-.workspace-split.mod-vertical~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both .floating-toc:hover .heading-list-item>.text-wrap {
+.workspace-split.mod-vertical~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both:hover .floating-toc .heading-list-item>.text-wrap {
   justify-content: flex-end;
   text-align: right;
   display: inline-flex;
@@ -1323,7 +1326,7 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 }
 
 .workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both.alignLeft.pin .floating-toc .heading-list-item>.text-wrap,
-.workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both.alignLeft .floating-toc:hover .heading-list-item>.text-wrap {
+.workspace-tabs~.workspace-tabs.mod-top-right-space .floating-toc-div.floating-both.alignLeft:hover .floating-toc .heading-list-item>.text-wrap {
   max-width: 12rem;
   text-overflow: ellipsis;
   justify-content: flex-start;
@@ -1340,7 +1343,7 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 }
 
 .workspace-split.mod-vertical .workspace-tabs~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both.alignLeft.pin .floating-toc .heading-list-item>.text-wrap,
-.workspace-split.mod-vertical .workspace-tabs~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both.alignLeft .floating-toc:hover .heading-list-item>.text-wrap {
+.workspace-split.mod-vertical .workspace-tabs~.workspace-split.mod-horizontal>.workspace-tabs .floating-toc-div.floating-both.alignLeft:hover .floating-toc .heading-list-item>.text-wrap {
   max-width: 12rem;
   text-overflow: ellipsis;
   justify-content: flex-start;
@@ -1356,7 +1359,7 @@ body.enable-bold-bar .floating-toc-div .heading-list-item .line-wrap .line
 }
 
 .workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both.alignLeft.pin .floating-toc .heading-list-item>.text-wrap,
-.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both.alignLeft .floating-toc:hover .heading-list-item>.text-wrap {
+.workspace-split.mod-vertical>.workspace-tabs~.workspace-tabs .floating-toc-div.floating-both.alignLeft:hover .floating-toc .heading-list-item>.text-wrap {
   max-width: 12rem;
   text-overflow: ellipsis;
   justify-content: flex-start;
@@ -1421,7 +1424,7 @@ body.toggle-floating-toc-header-color .floating-toc-div .floating-toc .heading-l
 
 /**************/
 
-.enable-bar-icon .floating-toc-div:not(.hover) .floating-toc:has(>.heading-list-item)::before {
+.enable-bar-icon .floating-toc-div:not(:hover) .floating-toc:has(>.heading-list-item)::before {
   content: '';
   height: 12px;
   z-index: 10;
@@ -1435,14 +1438,14 @@ body.toggle-floating-toc-header-color .floating-toc-div .floating-toc .heading-l
   font-size: var(--font-adaptive-small);
 }
 
-.enable-bar-icon .floating-toc-div:not(.hover) .floating-toc:before {
+.enable-bar-icon .floating-toc-div:not(:hover) .floating-toc:before {
   opacity: .35;
   background-position: center center;
   background-size: 18px;
   background-image: url("data:image/svg+xml,%3Csvg t='1671519666455' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='11772' width='16' height='16'%3E%3Cpath d='M887.212102 264.644379 320.083527 264.644379c-29.826306 0-54.012148-23.896246-54.012148-53.723575s24.185842-53.723575 54.012148-53.723575l567.127552 0c29.827329 0 54.012148 23.896246 54.012148 53.723575S917.039431 264.644379 887.212102 264.644379zM887.212102 562.426483 320.083527 562.426483c-29.826306 0-54.012148-24.408923-54.012148-54.235229 0-29.828352 24.185842-54.235229 54.012148-54.235229l567.127552 0c29.827329 0 54.012148 24.406876 54.012148 54.235229C941.22425 538.018583 917.039431 562.426483 887.212102 562.426483zM887.212102 859.18528 320.083527 859.18528c-29.826306 0-54.012148-24.407899-54.012148-54.235229s24.185842-54.235229 54.012148-54.235229l567.127552 0c29.827329 0 54.012148 24.407899 54.012148 54.235229S917.039431 859.18528 887.212102 859.18528zM153.565003 257.94377l-47.261397 0c-13.05534 0-23.630187-10.601452-23.630187-23.655769l0-47.234791c0-13.080923 10.574846-23.630187 23.630187-23.630187l47.261397 0c13.054317 0 23.630187 10.549264 23.630187 23.630187l0 47.234791C177.19519 247.341295 166.61932 257.94377 153.565003 257.94377L153.565003 257.94377zM153.565003 852.076372l-47.261397 0c-13.05534 0-23.630187-10.600429-23.630187-23.655769l0-47.233768c0-13.080923 10.574846-23.63121 23.630187-23.63121l47.261397 0c13.054317 0 23.630187 10.550287 23.630187 23.63121l0 47.233768C177.19519 841.475943 166.61932 852.076372 153.565003 852.076372L153.565003 852.076372zM153.565003 541.507034l-47.261397 0c-13.05534 0-23.630187-10.601452-23.630187-23.655769l0-47.234791c0-13.080923 10.574846-23.630187 23.630187-23.630187l47.261397 0c13.054317 0 23.630187 10.549264 23.630187 23.630187l0 47.234791C177.19519 530.905582 166.61932 541.507034 153.565003 541.507034L153.565003 541.507034z' fill='white' p-id='11773'%3E%3C/path%3E%3C/svg%3E");
 }
 
-.theme-light.enable-bar-icon .floating-toc-div:not(.hover) .floating-toc:before {
+.theme-light.enable-bar-icon .floating-toc-div:not(:hover) .floating-toc:before {
   background-image: url("data:image/svg+xml,%3Csvg t='1671519666455' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='11772' width='16' height='16'%3E%3Cpath d='M887.212102 264.644379 320.083527 264.644379c-29.826306 0-54.012148-23.896246-54.012148-53.723575s24.185842-53.723575 54.012148-53.723575l567.127552 0c29.827329 0 54.012148 23.896246 54.012148 53.723575S917.039431 264.644379 887.212102 264.644379zM887.212102 562.426483 320.083527 562.426483c-29.826306 0-54.012148-24.408923-54.012148-54.235229 0-29.828352 24.185842-54.235229 54.012148-54.235229l567.127552 0c29.827329 0 54.012148 24.406876 54.012148 54.235229C941.22425 538.018583 917.039431 562.426483 887.212102 562.426483zM887.212102 859.18528 320.083527 859.18528c-29.826306 0-54.012148-24.407899-54.012148-54.235229s24.185842-54.235229 54.012148-54.235229l567.127552 0c29.827329 0 54.012148 24.407899 54.012148 54.235229S917.039431 859.18528 887.212102 859.18528zM153.565003 257.94377l-47.261397 0c-13.05534 0-23.630187-10.601452-23.630187-23.655769l0-47.234791c0-13.080923 10.574846-23.630187 23.630187-23.630187l47.261397 0c13.054317 0 23.630187 10.549264 23.630187 23.630187l0 47.234791C177.19519 247.341295 166.61932 257.94377 153.565003 257.94377L153.565003 257.94377zM153.565003 852.076372l-47.261397 0c-13.05534 0-23.630187-10.600429-23.630187-23.655769l0-47.233768c0-13.080923 10.574846-23.63121 23.630187-23.63121l47.261397 0c13.054317 0 23.630187 10.550287 23.630187 23.63121l0 47.233768C177.19519 841.475943 166.61932 852.076372 153.565003 852.076372L153.565003 852.076372zM153.565003 541.507034l-47.261397 0c-13.05534 0-23.630187-10.601452-23.630187-23.655769l0-47.234791c0-13.080923 10.574846-23.630187 23.630187-23.630187l47.261397 0c13.054317 0 23.630187 10.549264 23.630187 23.630187l0 47.234791C177.19519 530.905582 166.61932 541.507034 153.565003 541.507034L153.565003 541.507034z' fill='%23272636' p-id='11773'%3E%3C/path%3E%3C/svg%3E");
 }
 
@@ -1458,20 +1461,21 @@ body.toggle-floating-toc-header-color .floating-toc-div .floating-toc .heading-l
 
 
 
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='1']+li.heading-list-item[data-level='2']::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='2']+li.heading-list-item[data-level='3']::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='3']+li.heading-list-item[data-level='4']::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='4']+li.heading-list-item[data-level='5']::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='5']+li.heading-list-item[data-level='6']::before {
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='1']+li.heading-list-item[data-level='2']::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='2']+li.heading-list-item[data-level='3']::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='3']+li.heading-list-item[data-level='4']::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='4']+li.heading-list-item[data-level='5']::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='5']+li.heading-list-item[data-level='6']::before {
   top: calc(calc(var(--nav-item-size) * 1.8) / 2 * -0.8) !important;
+ 
 
 }
 
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='1']~.heading-list-item[data-level='2']:not([iscollapsed])::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='2']~.heading-list-item[data-level='3']:not([iscollapsed])::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='3']~.heading-list-item[data-level='4']:not([iscollapsed])::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='4']~.heading-list-item[data-level='5']:not([iscollapsed])::before,
-body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list-item[data-level='5']~.heading-list-item[data-level='6']:not([iscollapsed])::before {
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='1']~.heading-list-item[data-level='2']:not([iscollapsed])::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='2']~.heading-list-item[data-level='3']:not([iscollapsed])::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='3']~.heading-list-item[data-level='4']:not([iscollapsed])::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='4']~.heading-list-item[data-level='5']:not([iscollapsed])::before,
+body.float-curves-outline-style .floating-toc-div:is(:hover, .pin) .heading-list-item[data-level='5']~.heading-list-item[data-level='6']:not([iscollapsed])::before {
   content: " ";
   position: absolute;
   top: calc(calc(var(--nav-item-size) * 1.8) / 2 * -1.6);
@@ -1483,9 +1487,10 @@ body.float-curves-outline-style .floating-toc-div:is(.hover, .pin) .heading-list
   border-left: 2px solid hsla(var(--color-accent-hsl), 0.9);
   pointer-events: none;
 }
-body.float-curves-outline-style.enable-bold-bar .floating-toc-div:is(.hover, .pin) .heading-list-item:not([iscollapsed])::before
+body.float-curves-outline-style.enable-bold-bar .floating-toc-div:is(:hover, .pin) .heading-list-item:not([iscollapsed])::before
 {
 left: 2rem;
+ 
 }
 .heading-list-item[data-level='2']::before {
   left: 0.7rem;
@@ -1546,7 +1551,7 @@ body.float-outline-style.enable-bold-bar .heading-list-item::before
 /* 对于折叠状态 */
 
 .floating-toc-div.pin .heading-list-item[isCollapsed="true"] .heading-rendered::before,
-.floating-toc-div.hover .heading-list-item[isCollapsed="true"] .heading-rendered::before {
+.floating-toc-div:hover .heading-list-item[isCollapsed="true"] .heading-rendered::before {
   /* content: '▶';  */
   /* 源文件是src/resources/右键头，需要调整颜色和大小后转化成 URL encoded */
   content: url("data:image/svg+xml,%3C%3Fxml version='1.0' standalone='no'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg t='1701099392052' class='icon' viewBox='0 0 1024 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='4217' xmlns:xlink='http://www.w3.org/1999/xlink' width='0.65em' height='0.65em'%3E%3Cpath d='M757.792745 435.407215L419.597482 96.904967c-40.010393-40.010393-104.886579-40.010393-144.896972 0-40.010393 40.010393-40.010393 104.988908 0 144.9993L540.344959 507.855701 274.70051 773.807135c-40.010393 40.112721-40.010393 104.988908 0 144.9993 40.010393 40.010393 104.886579 40.010393 144.896972 0l338.092935-338.39992c40.112721-40.010393 40.112721-104.988908 0.102328-144.9993z' fill='%23d3c6aa' p-id='4218'%3E%3C/path%3E%3C/svg%3E%0A");
@@ -1568,7 +1573,7 @@ body.float-outline-style.enable-bold-bar .heading-list-item::before
 
 /* 对于展开状态 */
 .floating-toc-div.pin .heading-list-item[isCollapsed="false"] .heading-rendered::before,
-.floating-toc-div.hover .heading-list-item[isCollapsed="false"] .heading-rendered::before {
+.floating-toc-div:hover .heading-list-item[isCollapsed="false"] .heading-rendered::before {
   /* content: '▼';  */
   content: url("data:image/svg+xml,%3C%3Fxml version='1.0' standalone='no'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg t='1701099490786' class='icon' viewBox='0 0 1026 1024' version='1.1' xmlns='http://www.w3.org/2000/svg' p-id='7616' xmlns:xlink='http://www.w3.org/1999/xlink' width='0.65em' height='0.65em'%3E%3Cpath d='M857.088 224.256q28.672-28.672 69.12-28.672t69.12 28.672q29.696 28.672 29.696 68.608t-29.696 68.608l-382.976 380.928q-12.288 14.336-30.72 19.968t-38.912 4.608-40.448-8.704-34.304-22.016l-376.832-374.784q-29.696-28.672-29.696-68.608t29.696-68.608q14.336-14.336 32.256-21.504t36.864-7.168 37.376 7.168 32.768 21.504l313.344 309.248z' fill='%23d3c6aa' p-id='7617'%3E%3C/path%3E%3C/svg%3E%0A");
   position: absolute;
@@ -1594,4 +1599,123 @@ body.float-outline-style.enable-bold-bar .heading-list-item::before
   align-items: center;
 }
 
- 
+/* 标签页容器样式 */
+.floating-toc-tabs {
+  margin: 20px 0;
+}
+
+/* 标签页头部样式 */
+.floating-toc-tab-header {
+  display: flex;
+  border-bottom: 1px solid var(--background-modifier-border);
+  margin-bottom: 20px;
+}
+
+/* 标签页样式 */
+.floating-toc-tab {
+  padding: 8px 16px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-bottom: none;
+  margin-bottom: -1px;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.floating-toc-tab:hover {
+  color: var(--text-normal);
+  background-color: var(--background-modifier-hover);
+}
+
+.floating-toc-tab.active {
+  color: var(--text-normal);
+  border-color: var(--background-modifier-border);
+  border-bottom-color: var(--background-primary);
+  background-color: var(--background-primary);
+}
+
+/* 标签页内容区域样式 */
+.floating-toc-tab-pane {
+  display: none;
+  padding: 10px 0;
+}
+
+.floating-toc-tab-pane.active {
+  display: block;
+}
+
+/* 设置项标题样式 */
+.floating-toc-tab-pane h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+/* 设置项容器样式 */
+.floating-toc-tab-pane .setting-item {
+  margin-bottom: 15px;
+}
+
+/* 设置项描述文本样式 */
+.floating-toc-tab-pane .setting-item-description {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
+/* 设置项控件样式 */
+.floating-toc-tab-pane .setting-item-control {
+  margin-top: 5px;
+}
+
+/* 下拉菜单样式 */
+.floating-toc-tab-pane .dropdown {
+  width: 100%;
+  max-width: 200px;
+}
+
+/* 开关按钮样式 */
+.floating-toc-tab-pane .checkbox-container {
+  margin-top: 5px;
+}
+
+/* 提示框样式 */
+.floating-toc-tab-pane .callout {
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: var(--background-modifier-hover);
+}
+
+.floating-toc-tab-pane .callout-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.floating-toc-tab-pane .callout-content {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+/* 按钮样式 */
+.floating-toc-tab-pane .mod-cta {
+  margin-top: 10px;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+  .floating-toc-tab-header {
+      flex-wrap: wrap;
+  }
+  
+  .floating-toc-tab {
+      flex: 1 1 50%;
+      text-align: center;
+  }
+}
+
+
+.floating-toc-tabs .setting-item {
+ border-top: none;
+}

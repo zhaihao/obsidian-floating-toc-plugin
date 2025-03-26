@@ -6,7 +6,6 @@ import { creatToc } from "src/components/floatingtocUI"
 import { t } from 'src/translations/helper';
 import { FlowList } from './flow-list';
 
-
 export class FlotingTOCSettingTab extends PluginSettingTab {
   plugin: FloatingToc;
   appendMethod: string;
@@ -23,6 +22,8 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
+    
+    // 标题和作者信息
     containerEl.createEl("h1", { text: "Obsidian Floating TOC " });
     containerEl.createEl("span", { text: "" }).createEl("a", {
       text: "Author: Cuman ✨",
@@ -37,6 +38,7 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
       href: "https://github.com/cumany/obsidian-floating-toc-plugin/blob/master/README.md",
     });
 
+    // 提示信息
     let tipsE1 = containerEl.createEl("div");
     tipsE1.addClass('callout');
     tipsE1.setAttribute("data-callout", "info");
@@ -47,127 +49,130 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
       text: t("ctrl + click on the floating toc to collapse/expand the header.")
     })
     tips_contentE1.addClass("callout-content");
- 
-    containerEl.createEl("h2", { text: t("Plugin Settings") });
-    let posE1 = new Setting(containerEl)
-    posE1.setName(t('Floating TOC position')
-    )
-    if (this.plugin.settings.positionStyle == "both") {
-      posE1.setDesc(
-        t("When the panel is split left and right, the right side of the layout is aligned right and the left side of the panel is aligned left.")
-      )
-    } else if (this.plugin.settings.positionStyle == "right") {
-      posE1.setDesc(
-        t("Floating TOC position, on the right side of the notes")
-      )
-    } else
-      posE1.setDesc(t('Floating TOC position, default on the left side of the notes'));
-    posE1.addDropdown((dropdown) => {
-      let posotions: Record<string, string> = {};
-      POSITION_STYLES.map((posotion: string) => (posotions[posotion] = posotion));
-      dropdown.addOptions(posotions);
-      dropdown
-        .setValue(this.plugin.settings.positionStyle)
-        .onChange((positionStyle: string) => {
-          this.plugin.settings.positionStyle = positionStyle;
+
+    // 创建标签页容器
+    const tabContainer = containerEl.createEl("div", { cls: "floating-toc-tabs" });
+    const tabHeader = tabContainer.createEl("div", { cls: "floating-toc-tab-header" });
+    const tabContent = tabContainer.createEl("div", { cls: "floating-toc-tab-content" });
+
+    // 创建标签页
+    const tabs = ["TOC Display", "Interaction", "Style Settings"];
+    const tabElements: { [key: string]: HTMLElement } = {};
+    
+    tabs.forEach((tabName) => {
+      const tab = tabHeader.createEl("div", { cls: "floating-toc-tab" });
+      tab.setText(tabName);
+      tab.addEventListener("click", () => {
+        // 移除所有活动状态
+        tabHeader.querySelectorAll(".floating-toc-tab").forEach((t) => t.removeClass("active"));
+        tabContent.querySelectorAll(".floating-toc-tab-pane").forEach((p) => p.removeClass("active"));
+        // 添加当前活动状态
+        tab.addClass("active");
+        tabElements[tabName].addClass("active");
+      });
+      
+      const pane = tabContent.createEl("div", { cls: "floating-toc-tab-pane" });
+      tabElements[tabName] = pane;
+    });
+
+    // 设置第一个标签为默认活动
+    tabHeader.querySelector(".floating-toc-tab")?.addClass("active");
+    tabContent.querySelector(".floating-toc-tab-pane")?.addClass("active");
+
+    
+    
+    
+    // 目录显示设置
+    const tocDisplay = tabElements["TOC Display"];
+    tocDisplay.createEl("h2", { text: t("TOC Display Settings") });
+
+    let posE1 = new Setting(tocDisplay)
+    .setName(t('Floating TOC position'))
+    .setDesc(this.plugin.settings.positionStyle == "both" 
+      ? t("When the panel is split left and right, the right side of the layout is aligned right and the left side of the panel is aligned left.")
+      : this.plugin.settings.positionStyle == "right"
+      ? t("Floating TOC position, on the right side of the notes")
+      : t('Floating TOC position, default on the left side of the notes'));
+  
+  posE1.addDropdown((dropdown) => {
+    let posotions: Record<string, string> = {};
+    POSITION_STYLES.map((posotion: string) => (posotions[posotion] = posotion));
+    dropdown.addOptions(posotions);
+    dropdown
+      .setValue(this.plugin.settings.positionStyle)
+      .onChange((positionStyle: string) => {
+        this.plugin.settings.positionStyle = positionStyle;
+        this.plugin.saveSettings();
+        setTimeout(() => {
+          this.display();
+          dispatchEvent(new Event("refresh-toc"));
+        }, 100);
+      });
+  });
+
+  if (this.plugin.settings.positionStyle != "left") {
+    new Setting(tocDisplay)
+      .setName(t('Left alignment of TOC text'))
+      .setDesc(t("whether the text in TOC is left aligned"))
+      .addToggle(toggle => toggle.setValue(this.plugin.settings?.isLeft)
+        .onChange((value) => {
+          this.plugin.settings.isLeft = value;
           this.plugin.saveSettings();
           setTimeout(() => {
             this.display();
             dispatchEvent(new Event("refresh-toc"));
           }, 100);
-        });
-    });
-    if (this.plugin.settings.positionStyle != "left") {
-      new Setting(containerEl)
-        .setName(t('Left alignment of TOC text')
-        )
-        .setDesc(
-          t("whether the text in TOC is left aligned")
-        )
-        .addToggle(toggle => toggle.setValue(this.plugin.settings?.isLeft)
-          .onChange((value) => {
-            this.plugin.settings.isLeft = value;
-            this.plugin.saveSettings();
-            setTimeout(() => {
-              this.display();
-              dispatchEvent(new Event("refresh-toc"));
-            }, 100);
-          }));
-    }
+        }));
+  }
 
-  
+  new Setting(tocDisplay)
+    .setName(t('Default Hide TOC'))
+    .setDesc(t("When enabled, TOC will be hidden by default when plugin starts"))
+    .addToggle(toggle => toggle.setValue(this.plugin.settings?.isDefaultHide)
+      .onChange((value) => {
+        this.plugin.settings.isDefaultHide = value;
+        this.plugin.saveSettings();
+        setTimeout(() => {
+          dispatchEvent(new Event("refresh-toc"));
+        }, 100);
+      }));
 
-    // new Setting(containerEl)
-    //   .setName(t('Mobile enabled or not')
-    //   )
-    //   .setDesc(
-    //     t("Whether to enable the plugin for the mobile client, the default is enabled.")
-    //   )
-    //   .addToggle(toggle => toggle.setValue(this.plugin.settings?.isLoadOnMobile)
-    //     .onChange((value) => {
-    //       this.plugin.settings.isLoadOnMobile = value;
-    //       this.plugin.saveSettings();
-    //       setTimeout(() => {
-    //         dispatchEvent(new Event("refresh-toc"));
-    //       }, 100);
-    //     }));
-
-    // new Setting(containerEl)
-    // .setName(t("Default Collapsed Level"))
-    // .setDesc(t("Set the default collapsed level of headings when initialised"))
-    // .addDropdown(dropdown => {
-    //   dropdown.addOptions({
-    //     '1': '1',
-    //     '2': '2',
-    //     '3': '3',
-    //     '4': '4',
-    //     '5': '5',
-    //     '6': 'None'
-    //   });
-    //   dropdown.setValue(this.plugin.settings.defaultCollapsedLevel.toString())
-    //     .onChange((value) => {
-    //       this.plugin.settings.defaultCollapsedLevel = parseInt(value);
-    //       this.plugin.saveSettings();
-    //       setTimeout(() => {
-    //         dispatchEvent(new Event("refresh-toc"));
-    //       }, 100);
-    //     });
-    // });
-
-    new Setting(containerEl)
-    .setName(t("Expand All Subheadings Recursively"))
-    .setDesc(t("When disabled, only direct subheadings will be expanded"))
-    .addToggle(toggle => toggle.setValue(this.plugin.settings.expandAllSubheadings)
-    .onChange((value) => {
-      this.plugin.settings.expandAllSubheadings = value;
-      this.plugin.saveSettings();
-      setTimeout(() => {
-        dispatchEvent(new Event("refresh-toc"));
-      }, 100);
-    }));
-        
-    new Setting(containerEl)
-      .setName(t('Hide heading level')
-      )
-      .setDesc(
-        t("Whichever option is selected, the corresponding heading level will be hidden")
-      )
-      let HeadList = new FlowList(containerEl);
-      const headerLevel=[1,2,3,4,5,6]
-      headerLevel.forEach(async (level) => {   
-        let levelsToFilter = this.plugin.settings.ignoreHeaders.split("\n");
-        let isChecked = levelsToFilter.includes(level.toString()); //默认忽略第1级
-        HeadList.addItem(level.toString(), level.toString(), isChecked, (value) => {
-          this.plugin.settings.ignoreHeaders = HeadList.checkedList.join('\n');
+    new Setting(tocDisplay)
+      .setName(t("Expand All Subheadings Recursively"))
+      .setDesc(t("When disabled, only direct subheadings will be expanded"))
+      .addToggle(toggle => toggle.setValue(this.plugin.settings.expandAllSubheadings)
+        .onChange((value) => {
+          this.plugin.settings.expandAllSubheadings = value;
           this.plugin.saveSettings();
           setTimeout(() => {
             dispatchEvent(new Event("refresh-toc"));
           }, 100);
-        });
-      });   
-    new Setting(containerEl)
-      .setName(t('Default Pin')
-      )
+        }));
+
+    new Setting(tocDisplay)
+      .setName(t('Hide heading level'))
+      .setDesc(t("Whichever option is selected, the corresponding heading level will be hidden"));
+    
+    let HeadList = new FlowList(tocDisplay);
+    const headerLevel=[1,2,3,4,5,6]
+    headerLevel.forEach(async (level) => {   
+      let levelsToFilter = this.plugin.settings.ignoreHeaders.split("\n");
+      let isChecked = levelsToFilter.includes(level.toString());
+      HeadList.addItem(level.toString(), level.toString(), isChecked, (value) => {
+        this.plugin.settings.ignoreHeaders = HeadList.checkedList.join('\n');
+        this.plugin.saveSettings();
+        setTimeout(() => {
+          dispatchEvent(new Event("refresh-toc"));
+        }, 100);
+      });
+    });
+
+    // 交互设置
+    const interaction = tabElements["Interaction"];
+    interaction.createEl("h2", { text: t("Interaction Settings") });
+
+    new Setting(interaction)
+      .setName(t('Default Pin'))
       .addToggle(toggle => toggle.setValue(this.plugin.settings?.isDefaultPin)
         .onChange((value) => {
           this.plugin.settings.isDefaultPin = value;
@@ -176,9 +181,9 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
             dispatchEvent(new Event("refresh-toc"));
           }, 100);
         }));
-    new Setting(containerEl)
-      .setName(t('Enable Tooltip')
-      )
+
+    new Setting(interaction)
+      .setName(t('Enable Tooltip'))
       .addToggle(toggle => toggle.setValue(this.plugin.settings?.isTooltip)
         .onChange((value) => {
           this.plugin.settings.isTooltip = value;
@@ -187,15 +192,60 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
             dispatchEvent(new Event("refresh-toc"));
           }, 100);
         }));
-    containerEl.createEl("h2", { text: t("Plugin Style Settings") });
-    let styleE1 = containerEl.createEl("div");
+
+    // 样式设置
+    const styleSettings = tabElements["Style Settings"];
+    styleSettings.createEl("h2", { text: t("Style Settings") });
+
+    new Setting(styleSettings)
+      .setName(t("Header single line display"))
+      .setDesc(t("When enabled, heading text will be displayed in a single line"))
+      .addToggle(toggle => toggle.setValue(this.plugin.settings?.enableHeadingNowrap)
+        .onChange((value) => {
+          this.plugin.settings.enableHeadingNowrap = value;
+          this.plugin.saveSettings();
+          setTimeout(() => {
+            dispatchEvent(new Event("refresh-toc"));
+          }, 100);
+        }));
+
+    new Setting(styleSettings)
+      .setName(t("Indicator bar style"))
+      .setDesc(t("Choose the style of the indicator bar"))
+      .addDropdown(dropdown => {
+        dropdown
+          .addOption("default-bar-style", t("Default"))
+          .addOption("enable-bar-icon", t("Icon"))
+          .addOption("enable-bold-bar", t("Bold"))
+          .setValue(this.plugin.settings.barStyle)
+          .onChange((value) => {
+            this.plugin.settings.barStyle = value;
+            this.plugin.saveSettings();
+            setTimeout(() => {
+              dispatchEvent(new Event("refresh-toc"));
+            }, 100);
+          });
+      });
+
+    new Setting(styleSettings)
+      .setName(t("Show heading text next to indicator bar"))
+      .setDesc(t("When enabled, heading text will be shown next to the indicator bar"))
+      .addToggle(toggle => toggle.setValue(this.plugin.settings?.enableBarHeadingText)
+        .onChange((value) => {
+          this.plugin.settings.enableBarHeadingText = value;
+          this.plugin.saveSettings();
+          setTimeout(() => {
+            dispatchEvent(new Event("refresh-toc"));
+          }, 100);
+        }));
+    styleSettings.createEl("h2", { text: t("More Style Settings") });
+    let styleE1 = styleSettings.createEl("div");
     styleE1.addClass('callout');
     styleE1.setAttribute("data-callout", "warning");
-    let titleE1 = styleE1.createEl("div", { text: "🔔 Notice: Please click the button again,If the floating-toc option is not found in the style settings" })
-    titleE1.addClass("callout-title")
     let contentE1 = styleE1.createEl("div")
     contentE1.addClass("callout-content");
-    const isEnabled = app.plugins.enabledPlugins.has("obsidian-style-settings");
+    
+    const isEnabled = this.app.plugins.enabledPlugins.has("obsidian-style-settings");
     if (isEnabled) {
       contentE1.createEl("br");
       let button = new ButtonComponent(contentE1);
@@ -204,17 +254,16 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
         .setClass("mod-cta")
         .setButtonText("🎨 Open style settings")
         .onClick(() => {
-          app.setting.open();
-          app.setting.openTabById("obsidian-style-settings");
-          app.workspace.trigger("parse-style-settings");
+          this.app.setting.open();
+          this.app.setting.openTabById("obsidian-style-settings");
+          this.app.workspace.trigger("parse-style-settings");
           setTimeout(() => {
-            let floatsettingEI = app.setting.activeTab.containerEl.querySelector(".setting-item-heading[data-id='floating-toc-styles']")
+            let floatsettingEI = this.app.setting.activeTab.containerEl.querySelector(".setting-item-heading[data-id='floating-toc-styles']")
             if (floatsettingEI) { floatsettingEI.addClass?.("float-cta"); }
             else {
-              app.workspace.trigger("parse-style-settings");
-              app.setting.activeTab.containerEl.querySelector(".setting-item-heading[data-id='floating-toc-styles']")?.addClass?.("float-cta");
+              this.app.workspace.trigger("parse-style-settings");
+              this.app.setting.activeTab.containerEl.querySelector(".setting-item-heading[data-id='floating-toc-styles']")?.addClass?.("float-cta");
             }
-
           }, 250);
         });
     } else {
@@ -225,7 +274,7 @@ export class FlotingTOCSettingTab extends PluginSettingTab {
       })
     }
 
-
+    // 捐赠部分
     const cDonationDiv = containerEl.createEl("div", {
       cls: "cDonationSection",
     });

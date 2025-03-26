@@ -8,7 +8,7 @@ import {
     HeadingCache,
     MarkdownRenderer,
     ButtonComponent,
-    View,
+    debounce,
 } from "obsidian";
 import {
     toggleCollapse,
@@ -136,12 +136,12 @@ export async function renderHeader(
 export async function createLi(
     plugin: FloatingToc,
     view: MarkdownView,
-    ul_dom: HTMLElement |DocumentFragment,
+    ul_dom: HTMLElement | DocumentFragment,
     heading: HeadingCache,
     index: number
 ) {
     // 检查是否是大型文档
-   // const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 100;
+    // const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 100;
     let li_dom = ul_dom.createEl("li");
     li_dom.addClass("heading-list-item");
     li_dom.setAttribute("data-level", heading?.level?.toString() ?? "");
@@ -149,25 +149,25 @@ export async function createLi(
     li_dom.setAttribute("data-line", heading?.position?.start?.line?.toString() ?? "");
     let text_dom = li_dom.createEl("div");
     text_dom.addClass("text-wrap");
-    
+
     // if (isLargeDocument) {
-         
+
     //     // 对于大型文档，使用简化的渲染方式以提高性能
     //     // 直接创建文本元素而不使用Markdown渲染
     //     const textEl = text_dom.createEl("a");
     //     textEl.addClass("text");
     //     textEl.textContent = heading.heading;
-        
+
     //     // 添加点击事件
     //     textEl.onclick = function(event: MouseEvent) {
     //         event.stopPropagation();
     //         const startline = heading.position.start.line;
-            
+
     //         if (event.ctrlKey || event.metaKey) {
     //             foldHeader(view, startline);
     //         } else {
     //             openFiletoline(view, startline);
-                
+
     //             const prevLocation = ul_dom.querySelector(".text-wrap.located");
     //             if (prevLocation) {
     //                 prevLocation.removeClass("located");
@@ -175,11 +175,11 @@ export async function createLi(
     //             text_dom.addClass("located");
     //         }
     //     };
-        
+
     //     // 检查是否有子标题
     //     if (hasChildHeading(index, plugin.headingdata)) {
     //         li_dom.setAttribute("isCollapsed", "false");
-            
+
     //         // 添加折叠/展开点击事件
     //         li_dom.addEventListener("click", (e: MouseEvent) => {
     //             e.stopPropagation();
@@ -187,10 +187,10 @@ export async function createLi(
     //         });
     //     }
     // } else {
-        // 对于标题数量较少的情况，使用完整的Markdown渲染
+    // 对于标题数量较少的情况，使用完整的Markdown渲染
     await renderHeader(plugin, view, heading.heading, text_dom, view.file.path, null);
-    
-    
+
+
     let line_dom = li_dom.createEl("div");
     line_dom.addClass("line-wrap");
     line_dom.createDiv().addClass("line");
@@ -205,8 +205,10 @@ const openFiletoline = (view: MarkdownView, lineNumber: number) => {
     });
 };
 const foldHeader = (view: MarkdownView, startline: number) => {
+
     // const view = plugin.app.workspace.getActiveViewOfType(MarkdownView)
     const existingFolds = view?.currentMode.getFoldInfo()?.folds ?? [];
+
     const headfrom = startline;
     let index = 0;
     if (
@@ -231,7 +233,7 @@ const foldHeader = (view: MarkdownView, startline: number) => {
     });
     view?.onMarkdownFold();
 };
- 
+
 
 export function creatToc(app: App, plugin: FloatingToc): void {
     const genToc = (
@@ -266,15 +268,15 @@ export function creatToc(app: App, plugin: FloatingToc): void {
         else floatingTocWrapper.removeClass("alignLeft");
         let ul_dom = floatingTocWrapper.createEl("ul");
         ul_dom.addClass("floating-toc");
-     
-  
+
+
         let toolbar = floatingTocWrapper.createEl("div");
-        
+
         // 创建 toolbar 的内容移到这里
         createToolbar(plugin, toolbar as HTMLElement, floatingTocWrapper as HTMLElement);
-    
-       
-       
+
+
+
         if (plugin.settings.ignoreHeaders) {
             let levelsToFilter = plugin.settings.ignoreHeaders.split("\n");
             plugin.headingdata = app.metadataCache
@@ -289,13 +291,13 @@ export function creatToc(app: App, plugin: FloatingToc): void {
         const renderHeadings = () => {
             const totalHeadings = plugin.headingdata.length;
             const view = app.workspace.getActiveViewOfType(MarkdownView);
-            
+
             // 如果标题数量很多，使用分批渲染
             if (totalHeadings > 50) {
                 // 首先渲染前20个标题，让用户能够立即看到内容
                 const initialBatchSize = 20;
                 const initialBatch = plugin.headingdata.slice(0, initialBatchSize);
-                
+
                 // 创建一个加载指示器
                 const loadingIndicator = document.createElement("div");
                 loadingIndicator.className = "toc-loading-indicator";
@@ -308,33 +310,33 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 loadingIndicator.style.top = "45px";
                 // 渲染初始批次
                 initialBatch.forEach((heading: HeadingCache, index: number) => {
-                  
+
                     createLi(plugin, view, ul_dom, heading, index);
                 });
-                
+
                 // 添加加载指示器
                 ul_dom.appendChild(loadingIndicator);
-                
+
                 // 使用requestIdleCallback在空闲时间渲染剩余标题
                 let nextIndex = initialBatchSize;
                 const batchSize = 20; // 每批处理的标题数量
-                
+
                 const renderNextBatch = () => {
-                    
+
                     // 确定这一批次要渲染的数量
                     const batchEndIndex = Math.min(nextIndex + batchSize, totalHeadings);
-                   
+
                     // 更新加载指示器
                     loadingIndicator.textContent = `加载中... (${batchEndIndex}/${totalHeadings})`;
-                    
+
                     // 渲染这一批次
                     for (let i = nextIndex; i < batchEndIndex; i++) {
                         createLi(plugin, view, ul_dom, plugin.headingdata[i], i);
                     }
-                    
+
                     // 更新下一批次的起始索引
                     nextIndex = batchEndIndex;
-                    
+
                     // 安排下一批次的渲染
                     if (nextIndex < totalHeadings) {
                         // 使用requestAnimationFrame确保UI响应性
@@ -347,7 +349,7 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                         loadingIndicator.remove();
                     }
                 };
-                
+
                 // 开始渲染剩余批次
                 setTimeout(renderNextBatch, 50);
             } else {
@@ -357,16 +359,16 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 });
             }
         };
-        
+
         // 执行渲染
         renderHeadings();
-      
+
         currentleaf
             ?.querySelector(".markdown-source-view")
             ?.insertAdjacentElement("beforebegin", floatingTocWrapper) ||
-        currentleaf
-            ?.querySelector(".markdown-reading-view")
-            ?.insertAdjacentElement("beforebegin", floatingTocWrapper);
+            currentleaf
+                ?.querySelector(".markdown-reading-view")
+                ?.insertAdjacentElement("beforebegin", floatingTocWrapper);
     };
     let Markdown = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (Markdown) {
@@ -382,8 +384,22 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                 floatingTocWrapper.addClass("floating-toc-div");
                 if (plugin.settings.isDefaultPin)
                     floatingTocWrapper.addClass("pin");
+                if (plugin.settings.isDefaultHide)
+                    floatingTocWrapper.addClass("hide");
+                if (plugin.settings.enableHeadingNowrap)
+                    document.body.addClass("enable-heading-nowrap");
+                if (plugin.settings.enableBarHeadingText)
+                    document.body.addClass("enable-bar-heading-text");
+                
+                // 移除所有可能的指示条样式类名
+                document.body.removeClass("default-bar-style");
+                document.body.removeClass("enable-bar-icon");
+                document.body.removeClass("enable-bold-bar");
+                // 添加当前选择的指示条样式类名
+                document.body.addClass(plugin.settings.barStyle);
+                
                 genToc(view.contentEl, floatingTocWrapper);
-              plugin.updateTocWidth(floatingTocWrapper as HTMLElement, plugin.headingdata);
+                plugin.updateTocWidth(floatingTocWrapper as HTMLElement, plugin.headingdata);
             } else return;
         }
     }
@@ -391,9 +407,9 @@ export function creatToc(app: App, plugin: FloatingToc): void {
 
 export function createToolbar(plugin: FloatingToc, toolbar: HTMLElement, float_toc_dom: HTMLElement) {
     toolbar.addClass("toolbar");
- 
+
     toolbar.addClass("hide");
- 
+
     let pinButton = new ButtonComponent(toolbar);
     pinButton
         .setIcon("pin")
@@ -403,7 +419,7 @@ export function createToolbar(plugin: FloatingToc, toolbar: HTMLElement, float_t
                 float_toc_dom.removeClass("pin");
             else float_toc_dom.addClass("pin");
         });
- 
+
     let topBuuton = new ButtonComponent(toolbar);
     topBuuton
         .setIcon("double-up-arrow-glyph")
@@ -425,20 +441,20 @@ export function createToolbar(plugin: FloatingToc, toolbar: HTMLElement, float_t
             const view =
                 this.app.workspace.getActiveViewOfType(MarkdownView);
             if (view) {
-             
-                 
-                    const file = this.app.workspace.getActiveFile()
-                    const content = await (this.app as any).vault.cachedRead(file);
-                    const lines = content.split('\n');
-                    let numberOfLines = lines.length;
-                    //in preview mode don't count empty lines at the end
-                    if (view.getMode() === 'preview') {
-                        while (numberOfLines > 0 && lines[numberOfLines - 1].trim() === '') {
-                            numberOfLines--;
-                        }
+
+
+                const file = this.app.workspace.getActiveFile()
+                const content = await (this.app as any).vault.cachedRead(file);
+                const lines = content.split('\n');
+                let numberOfLines = lines.length;
+                //in preview mode don't count empty lines at the end
+                if (view.getMode() === 'preview') {
+                    while (numberOfLines > 0 && lines[numberOfLines - 1].trim() === '') {
+                        numberOfLines--;
                     }
-                    view.currentMode.applyScroll((numberOfLines - 1))
-       
+                }
+                view.currentMode.applyScroll((numberOfLines - 1))
+
 
             }
         });
@@ -460,30 +476,20 @@ export function createToolbar(plugin: FloatingToc, toolbar: HTMLElement, float_t
         .setTooltip("Collapse/Expand all headings")
         .setClass("toggle-all")
         .onClick(() => {
-          
-          
-                const isAllExpanded = float_toc_dom.getAttribute("data-all-expanded") === "true";
-                toggleButton.setIcon(isAllExpanded ? "chevron-right" : "chevron-down");
-                // 使用新的 toggleAllHeadings 函数
-                toggleAllHeadings(float_toc_dom as HTMLElement, !isAllExpanded);
-                
-                // 更新全局状态
-                float_toc_dom.setAttribute("data-all-expanded", (!isAllExpanded).toString());
-                
-               
-            
+
+
+            const isAllExpanded = float_toc_dom.getAttribute("data-all-expanded") === "true";
+            toggleButton.setIcon(isAllExpanded ? "chevron-right" : "chevron-down");
+            // 使用新的 toggleAllHeadings 函数
+            toggleAllHeadings(float_toc_dom as HTMLElement, !isAllExpanded);
+
+            // 更新全局状态
+            float_toc_dom.setAttribute("data-all-expanded", (!isAllExpanded).toString());
+
+
+
         });
 
-            if (!float_toc_dom.hasAttribute("has-events")) {
-        float_toc_dom.onmouseenter = function () {
-            toolbar?.removeClass("hide");
-            float_toc_dom.addClass("hover");
-        };
-        float_toc_dom.onmouseleave = function () {
-            toolbar?.addClass("hide");
-            float_toc_dom.removeClass("hover");
-        };
-        float_toc_dom.setAttribute("has-events", "true");
-    }
+ 
 
 }

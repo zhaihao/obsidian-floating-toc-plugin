@@ -20,5 +20,21 @@ export default {
   'Set the default collapsed level of headings when initialised':'设置初始化时TOC中默认折叠的标题级别',
   'Default Collapsed Level':'默认折叠级别', 
   'Expand All Subheadings Recursively': '递归展开所有子标题',
-  'When disabled, only direct subheadings will be expanded': '关闭此选项时, 只展开直接子标题'
+  'When disabled, only direct subheadings will be expanded': '关闭此选项时, 只展开直接子标题',
+  'Basic Settings': '基本设置',
+  'TOC Display Settings': '目录显示设置',
+  'Interaction Settings': '交互设置',
+  'Style Settings': '样式设置',
+  'Default Hide TOC': '默认隐藏目录',
+  'When enabled, TOC will be hidden by default when plugin starts': '启用后，插件启动时目录将默认隐藏',
+  'Header single line display': '目录标题单行显示',
+  'When enabled, heading text will be displayed in a single line': '启用后，目录标题将在一行内显示',
+  'Indicator bar style': '指示条样式',
+  'Choose the style of the indicator bar': '选择指示条的样式',
+  'Default': '默认',
+  'Icon': '图标',
+  'Bold': '粗体',
+  'Show heading text next to indicator bar': '在指示条旁边显示标题上下级',
+  'When enabled, heading text will be shown next to the indicator bar': '启用后，标题文本将显示在指示条旁边',
+  'More Style Settings': '更多样式设置'
 };

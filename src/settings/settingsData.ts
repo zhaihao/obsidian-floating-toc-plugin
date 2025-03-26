@@ -1,5 +1,3 @@
-
-
 export const POSITION_STYLES = ["left", "right","both"];
 
 
@@ -13,6 +11,10 @@ export interface FlotingTOCSetting {
   isTooltip:boolean;
   defaultCollapsedLevel:number;
   expandAllSubheadings: boolean;
+  isDefaultHide: boolean;
+  enableHeadingNowrap: boolean;
+  barStyle: string;
+  enableBarHeadingText: boolean;
 }
 
 export const DEFAULT_SETTINGS: FlotingTOCSetting = {
@@ -25,4 +27,8 @@ export const DEFAULT_SETTINGS: FlotingTOCSetting = {
   isTooltip: false,
   defaultCollapsedLevel: 6,
   expandAllSubheadings: false,
+  isDefaultHide: false,
+  enableHeadingNowrap: false,
+  barStyle: "default-bar-style",
+  enableBarHeadingText: false,
 };

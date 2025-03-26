@@ -19,5 +19,22 @@ export default {
     'Set the default collapsed level of headings when initialised':'Set the default collapsed level of headings when initialised',
     'Default Collapsed Level':'Default Collapsed Levels',
     'Expand All Subheadings Recursively': 'Expand All Subheadings Recursively',
-    'When disabled, only direct subheadings will be expanded': 'When disabled, only direct subheadings will be expanded'
+    'When disabled, only direct subheadings will be expanded': 'When disabled, only direct subheadings will be expanded',
+    'Basic Settings': 'Basic Settings',
+    'TOC Display Settings': 'TOC Display Settings',
+    'Interaction Settings': 'Interaction Settings',
+    'Style Settings': 'Style Settings',
+    'Default Hide TOC': 'Default Hide TOC',
+    'When enabled, TOC will be hidden by default when plugin starts': 'When enabled, TOC will be hidden by default when plugin starts',
+    'Header single line display': 'Header single line display',
+    'When enabled, heading text will be displayed in a single line': 'When enabled, heading text will be displayed in a single line',
+    'Indicator bar style': 'Indicator bar style',
+    'Choose the style of the indicator bar': 'Choose the style of the indicator bar',
+    'Default': 'Default',
+    'Icon': 'Icon',
+    'Bold': 'Bold',
+    'Show heading text next to indicator bar': 'Show heading text next to indicator bar',
+    'When enabled, heading text will be shown next to the indicator bar': 'When enabled, heading text will be shown next to the indicator bar',
+    'More Style Settings': 'More Style Settings',
+    'Notice: Please click the button again,If the floating-toc option is not found in the style settings': 'Notice: Please click the button again,If the floating-toc option is not found in the style settings'
 };
