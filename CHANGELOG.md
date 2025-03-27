@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.6.2 (2025-03-27)
+### Update manifest.json
+### Merge branch 'master' of https://github.com/PKM-er/obsidian-floating-toc-plugin
+### fixed console error
+### Update README-zh_cn.md
+### Update README.md
+### Update CHANGELOG.md
+### Update manifest.json
+### Merge branch 'master' of https://github.com/PKM-er/obsidian-floating-toc-plugin
+### Update manifest.json and CHANGELOG.md for version 2.6.0
+
+
 ## Floating TOC 2.6.1 重装升级
 
 ### 核心架构改进
