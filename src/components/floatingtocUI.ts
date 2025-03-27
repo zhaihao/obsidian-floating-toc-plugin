@@ -142,12 +142,13 @@ export async function createLi(
 ) {
     // 检查是否是大型文档
     // const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 100;
-    let li_dom = ul_dom.createEl("li");
+    if (!heading) return; 
+    const li_dom = ul_dom.createEl("li");
     li_dom.addClass("heading-list-item");
     li_dom.setAttribute("data-level", heading?.level?.toString() ?? "");
     li_dom.setAttribute("data-id", index.toString());
     li_dom.setAttribute("data-line", heading?.position?.start?.line?.toString() ?? "");
-    let text_dom = li_dom.createEl("div");
+    const text_dom = li_dom.createEl("div");
     text_dom.addClass("text-wrap");
 
     // if (isLargeDocument) {
@@ -191,7 +192,7 @@ export async function createLi(
     await renderHeader(plugin, view, heading.heading, text_dom, view.file.path, null);
 
 
-    let line_dom = li_dom.createEl("div");
+    const line_dom = li_dom.createEl("div");
     line_dom.addClass("line-wrap");
     line_dom.createDiv().addClass("line");
 }

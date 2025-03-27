@@ -7,10 +7,10 @@ import {
 	HeadingCache,
 	App,
 } from "obsidian";
-import { creatToc, createLi, renderHeader, createToolbar } from "src/components/floatingtocUI";
+import { creatToc, createLi, createToolbar } from "src/components/floatingtocUI";
 import { FlotingTOCSettingTab } from "src/settings/settingsTab";
 import { FlotingTOCSetting, DEFAULT_SETTINGS } from "src/settings/settingsData";
-import { toggleCollapse, hasChildHeading } from "src/components/toggleCollapse";
+import {  hasChildHeading } from "src/components/toggleCollapse";
 
 let activeDocument: Document;
 let line = 0;
@@ -18,7 +18,7 @@ export function selfDestruct() {
 	requireApiVersion("0.15.0")
 		? (activeDocument = activeWindow.document)
 		: (activeDocument = window.document);
-	let float_toc_dom = activeDocument.querySelectorAll(".floating-toc-div");
+	const float_toc_dom = activeDocument.querySelectorAll(".floating-toc-div");
 	float_toc_dom.forEach((element) => {
 		if (element) {
 			element.remove();
@@ -32,7 +32,7 @@ export function refresh_node(plugin: FloatingToc, view: MarkdownView) {
 		? (activeDocument = activeWindow.document)
 		: (activeDocument = window.document);
 
-	let float_toc_dom = view.contentEl?.querySelector(".floating-toc-div");
+	const float_toc_dom = view.contentEl?.querySelector(".floating-toc-div");
 	if (!float_toc_dom) return false;
  
 	let toolbar = float_toc_dom.querySelector(".toolbar");
@@ -75,7 +75,7 @@ export function refresh_node(plugin: FloatingToc, view: MarkdownView) {
 
 	// 3. 使用 DocumentFragment 批量处理 DOM 操作
 	const fragment = activeDocument.createDocumentFragment();
-	let itemsToRemove = new Set(existingItems.values());
+	const itemsToRemove = new Set(existingItems.values());
 
 	// 4. 处理每个标题
 	headingdata.forEach((heading: HeadingCache, i: number) => {
@@ -108,7 +108,7 @@ export function refresh_node(plugin: FloatingToc, view: MarkdownView) {
 	return true;
 }
 function siblingElems(elem: Element) {
-	var nodes = [];
+	const nodes = [];
 	if (elem?.previousElementSibling) {
 		while ((elem = elem.previousElementSibling)) {
 			if (elem.nodeType == 1) {
@@ -119,7 +119,7 @@ function siblingElems(elem: Element) {
 	return nodes;
 }
 function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
-	let target = evt.target as HTMLElement;
+	const target = evt.target as HTMLElement;
 	if (
 		target.parentElement?.classList.contains("cm-editor") ||
 		target.parentElement?.classList.contains("markdown-reading-view")

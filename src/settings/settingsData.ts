@@ -24,11 +24,11 @@ export const DEFAULT_SETTINGS: FlotingTOCSetting = {
   isLoadOnMobile: true,
   isLeft: false,
   isDefaultPin: false,
-  isTooltip: false,
+  isTooltip: true,
   defaultCollapsedLevel: 6,
   expandAllSubheadings: false,
   isDefaultHide: false,
-  enableHeadingNowrap: false,
+  enableHeadingNowrap: true,
   barStyle: "enable-edge-style",
   enableBarHeadingText: false,
 };
