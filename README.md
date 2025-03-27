@@ -4,8 +4,9 @@
    
 Thanks to the [floating-toc](https://github.com/curtgrimes/obsidian-floating-toc-plugin) plugin for the inspiration, but since it had not been updated for a long time and was not compatible with new ob such as multi-window, I refactored the plugin and added a lot of features. Now the size of the plugin has been significantly reduced (only one thirtieth of the original), the functionality has been increased, and the performance has been improved.
 
+![floating toc](https://github.com/user-attachments/assets/b64c3add-b285-4756-8d74-58a872caf958)
 
- ![](https://raw.githubusercontent.com/cumany/cumany/main/pic/202209171712621.gif)
+ 
 
 ## Set the appearance with the style setting plugin
 ![float toc1](https://user-images.githubusercontent.com/42957010/195370659-d77a7c31-1711-42b3-80fc-3b9a06eb9b0c.gif)
