@@ -1077,10 +1077,10 @@ body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .heading-l
   width: unset;
   overflow: visible;
 }
-body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .floating-toc{
+/* body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .floating-toc{
   width: 2rem;
   overflow: visible;
-}
+} */
 body.enable-bar-heading-text .floating-toc-div:not(:is(:hover, .pin)) .heading-list-item:is(.located, .focus) .text-wrap {
   opacity: 1;
   
