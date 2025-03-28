@@ -222,6 +222,10 @@ export default class FloatingToc extends Plugin {
     private readonly REFRESH_COOLDOWN = 200; // 刷新冷却时间
     private currentFile: string | null = null;
 	public  BAR_STYLE_CLASSES = [
+		"enable-bar-heading-text",
+		"enable-heading-nowrap",
+		"pin",
+		"hide",
 		"default-bar-style",
 		"enable-edge-style",
 		"enable-bar-icon",

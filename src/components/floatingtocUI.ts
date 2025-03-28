@@ -142,7 +142,7 @@ export async function createLi(
 ) {
     // 检查是否是大型文档
     // const isLargeDocument = plugin.headingdata && plugin.headingdata.length > 100;
-    if (!heading) return; 
+    if (!heading) return;
     const li_dom = ul_dom.createEl("li");
     li_dom.addClass("heading-list-item");
     li_dom.setAttribute("data-level", heading?.level?.toString() ?? "");
@@ -383,6 +383,10 @@ export function creatToc(app: App, plugin: FloatingToc): void {
             if (!float_toc_dom) {
                 const floatingTocWrapper = createEl("div");
                 floatingTocWrapper.addClass("floating-toc-div");
+                // 移除所有可能的指示条样式类名
+                plugin.BAR_STYLE_CLASSES.forEach(className => {
+                    activeDocument.body.removeClass(className);
+                });
                 if (plugin.settings.isDefaultPin)
                     floatingTocWrapper.addClass("pin");
                 if (plugin.settings.isDefaultHide)
@@ -391,17 +395,15 @@ export function creatToc(app: App, plugin: FloatingToc): void {
                     activeDocument.body.addClass("enable-heading-nowrap");
                 if (plugin.settings.enableBarHeadingText)
                     activeDocument.body.addClass("enable-bar-heading-text");
-                
-               // 移除所有可能的指示条样式类名
-               plugin.BAR_STYLE_CLASSES.forEach(className => {
-                activeDocument.body.removeClass(className);
-              });
-   
+
+
+
                 // 添加当前选择的指示条样式类名
                 activeDocument.body.addClass(plugin.settings.barStyle || "enable-edge-style");
-                
+
                 genToc(view.contentEl, floatingTocWrapper);
                 plugin.updateTocWidth(floatingTocWrapper as HTMLElement, plugin.headingdata);
+ 
             } else return;
         }
     }
@@ -492,6 +494,6 @@ export function createToolbar(plugin: FloatingToc, toolbar: HTMLElement, float_t
 
         });
 
- 
+
 
 }
