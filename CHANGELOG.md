@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.4 (2025-03-28)
+### 修复修改设置后不生效
+### Update manifest.json and CHANGELOG.md for version 2.6.3
+
+
 ## 2.6.3 (2025-03-28)
 ### #132 fixed
 ### Update manifest.json and CHANGELOG.md for version 2.6.2
