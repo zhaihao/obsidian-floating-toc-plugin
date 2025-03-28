@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.3 (2025-03-28)
+### #132 fixed
+### Update manifest.json and CHANGELOG.md for version 2.6.2
+
+
 ## 2.6.2 (2025-03-27)
 ### Update manifest.json
 ### Merge branch 'master' of https://github.com/PKM-er/obsidian-floating-toc-plugin
