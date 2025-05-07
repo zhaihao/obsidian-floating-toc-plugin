@@ -67,18 +67,18 @@ export async function renderHeader(
     //      }
     container.parentElement.addEventListener("click", clickHandler);
 
-    // 如果有子标题则用属性标记，然后在css里用::before显示特殊符号
-    if (!container.parentElement.hasAttribute("isCollapsed")) {
-        if (hasChildHeading(index, plugin.headingdata)) {
-            container.parentElement.setAttribute("isCollapsed", "false");
-        }
-    } else {
-        if (!hasChildHeading(index, plugin.headingdata)) {
-            container.parentElement.removeAttribute("isCollapsed");
-            // 取消点击事件
-            container.parentElement.removeEventListener("click", clickHandler);
-        }
-    }
+    // // 如果有子标题则用属性标记，然后在css里用::before显示特殊符号
+    // if (!container.parentElement.hasAttribute("isCollapsed")) {
+    //     if (hasChildHeading(index, plugin.headingdata)) {
+    //         container.parentElement.setAttribute("isCollapsed", "false");
+    //     }
+    // } else {
+    //     if (!hasChildHeading(index, plugin.headingdata)) {
+    //         container.parentElement.removeAttribute("isCollapsed");
+    //         // 取消点击事件
+    //         container.parentElement.removeEventListener("click", clickHandler);
+    //     }
+    // }
 
     let subcontainer = container;
     component = new Component();
@@ -148,6 +148,11 @@ export async function createLi(
     li_dom.setAttribute("data-level", heading?.level?.toString() ?? "");
     li_dom.setAttribute("data-id", index.toString());
     li_dom.setAttribute("data-line", heading?.position?.start?.line?.toString() ?? "");
+
+	const line_dom = li_dom.createEl("div");
+	line_dom.addClass("line-wrap");
+	line_dom.createDiv().addClass("line");
+
     const text_dom = li_dom.createEl("div");
     text_dom.addClass("text-wrap");
 
@@ -190,11 +195,6 @@ export async function createLi(
     // } else {
     // 对于标题数量较少的情况，使用完整的Markdown渲染
     await renderHeader(plugin, view, heading.heading, text_dom, view.file.path, null);
-
-
-    const line_dom = li_dom.createEl("div");
-    line_dom.addClass("line-wrap");
-    line_dom.createDiv().addClass("line");
 }
 
 const openFiletoline = (view: MarkdownView, lineNumber: number) => {
@@ -271,10 +271,10 @@ export function creatToc(app: App, plugin: FloatingToc): void {
         ul_dom.addClass("floating-toc");
 
 
-        let toolbar = floatingTocWrapper.createEl("div");
-
-        // 创建 toolbar 的内容移到这里
-        createToolbar(plugin, toolbar as HTMLElement, floatingTocWrapper as HTMLElement);
+        // let toolbar = floatingTocWrapper.createEl("div");
+		//
+        // // 创建 toolbar 的内容移到这里
+        // createToolbar(plugin, toolbar as HTMLElement, floatingTocWrapper as HTMLElement);
 
 
 
