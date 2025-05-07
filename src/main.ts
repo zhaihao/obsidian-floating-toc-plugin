@@ -34,14 +34,14 @@ export function refresh_node(plugin: FloatingToc, view: MarkdownView) {
 
 	const float_toc_dom = view.contentEl?.querySelector(".floating-toc-div");
 	if (!float_toc_dom) return false;
- 
-	let toolbar = float_toc_dom.querySelector(".toolbar");
-    if (!toolbar) {
-        toolbar = float_toc_dom.createEl("div");
-     
-        // 创建 toolbar 的内容移到这里
-        createToolbar(plugin, toolbar as HTMLElement, float_toc_dom as HTMLElement);
-    }
+
+	// let toolbar = float_toc_dom.querySelector(".toolbar");
+    // if (!toolbar) {
+    //     toolbar = float_toc_dom.createEl("div");
+    //
+    //     // 创建 toolbar 的内容移到这里
+    //     createToolbar(plugin, toolbar as HTMLElement, float_toc_dom as HTMLElement);
+    // }
 
 	let ul_dom = float_toc_dom.querySelector("ul.floating-toc") as HTMLElement;
 	if (!ul_dom) {
@@ -156,7 +156,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 			let start = 0;
 			let end = headings.length - 1;
 			let foundIndex = -1;
-			
+
 			while (start <= end) {
 				let mid = Math.floor((start + end) / 2);
 				if (headings[mid].position.start.line <= current_line) {
@@ -166,7 +166,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 					end = mid - 1;
 				}
 			}
-			
+
 			if (foundIndex !== -1) {
 				targetLine = headings[foundIndex].position.start.line;
 				targetHeading = headings[foundIndex];
@@ -174,29 +174,29 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 				targetLine = firstline;
 			}
 		}
-		
+
 		// 3. 优化DOM操作，减少重绘次数
 		// 移除之前的高亮
 		const prevLocation = floattoc.querySelector(".heading-list-item.located");
 		if (prevLocation) {
 			prevLocation.removeClass("located");
 		}
-		
+
 		// 添加新的高亮
 		const curLocation = floattoc.querySelector(`li[data-line='${targetLine}']`) as HTMLElement;
 		if (!curLocation) return;
-		
+
 		curLocation.addClass("located");
-		
+
 		// 4. 批量处理类名更新
 		const level = parseInt(curLocation.getAttribute("data-level") || "1");
 		const adjustedLevel = level > 1 ? level - 1 : 1;
-		
+
 		const focusele = floattoc.querySelector(`li.focus`);
 		if (focusele) {
 			focusele.removeClass("focus");
 		}
-		
+
 		// 5. 减少DOM遍历
 		const siblings = siblingElems(curLocation);
 		for (let i = 0; i < siblings.length; i++) {
@@ -206,7 +206,7 @@ function _handleScroll(app: App, plugin: FloatingToc, evt: Event): any {
 				break;
 			}
 		}
-		
+
 		// 6. 使用requestAnimationFrame优化滚动
 		requestAnimationFrame(() => {
 			curLocation.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -252,23 +252,23 @@ export default class FloatingToc extends Plugin {
 		// 	console.log(`floating toc disable loading on mobile`);
 		// 	return;
 		// }
-		this.addCommand({
-			id: "pin-toc-panel",
-			name: "Pinning the Floating TOC panel",
-			icon: "pin",
-			callback: async () => {
-				let view = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (view) {
-					let floatingTocWrapper =
-						view.contentEl.querySelector(".floating-toc-div");
-					if (floatingTocWrapper) {
-						if (floatingTocWrapper.classList.contains("pin"))
-							floatingTocWrapper.removeClass("pin");
-						else floatingTocWrapper.addClass("pin");
-					}
-				}
-			},
-		});
+		// this.addCommand({
+		// 	id: "pin-toc-panel",
+		// 	name: "Pinning the Floating TOC panel",
+		// 	icon: "pin",
+		// 	callback: async () => {
+		// 		let view = this.app.workspace.getActiveViewOfType(MarkdownView);
+		// 		if (view) {
+		// 			let floatingTocWrapper =
+		// 				view.contentEl.querySelector(".floating-toc-div");
+		// 			if (floatingTocWrapper) {
+		// 				if (floatingTocWrapper.classList.contains("pin"))
+		// 					floatingTocWrapper.removeClass("pin");
+		// 				else floatingTocWrapper.addClass("pin");
+		// 			}
+		// 		}
+		// 	},
+		// });
 		this.addCommand({
 			id: "hide-toc-panel",
 			name: "Hide/Show the Floating TOC panel",
@@ -286,62 +286,62 @@ export default class FloatingToc extends Plugin {
 				}
 			},
 		});
-		this.addCommand({
-			id: "scroll-to-bottom",
-			name: "Scroll to Bottom",
-			icon: "double-down-arrow-glyph",
-			callback: async () => {
-				const view =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (view) {
+		// this.addCommand({
+		// 	id: "scroll-to-bottom",
+		// 	name: "Scroll to Bottom",
+		// 	icon: "double-down-arrow-glyph",
+		// 	callback: async () => {
+		// 		const view =
+		// 			this.app.workspace.getActiveViewOfType(MarkdownView);
+		// 		if (view) {
+		//
+		//
+		// 			const file = this.app.workspace.getActiveFile()
+		// 			const content = await (this.app as any).vault.cachedRead(file);
+		// 			const lines = content.split('\n');
+		// 			let numberOfLines = lines.length;
+		// 			//in preview mode don't count empty lines at the end
+		// 			if (view.getMode() === 'preview') {
+		// 				while (numberOfLines > 0 && lines[numberOfLines - 1].trim() === '') {
+		// 					numberOfLines--;
+		// 				}
+		// 			}
+		// 			view.currentMode.applyScroll((numberOfLines - 1))
+		//
+		//
+		// 		}
+		// 	},
+		// });
+		// this.addCommand({
+		// 	id: "scroll-to-top",
+		// 	name: "Scroll to Top",
+		// 	icon: "double-up-arrow-glyph",
+		// 	callback: async () => {
+		// 		const view =
+		// 			this.app.workspace.getActiveViewOfType(MarkdownView);
+		// 		if (view) {
+		// 			view.setEphemeralState({ scroll: 0 });
+		// 		}
+		// 	},
+		// });
+		// this.addCommand({
+		// 	id: "toggle-position-style",
+		// 	name: "Toggle Floating TOC Position (left/right)",
+		// 	icon: "switch",
+		// 	callback: () => {
+		// 		if (this.settings.positionStyle === "left") {
+		// 			this.settings.positionStyle = "right";
+		// 		} else if (this.settings.positionStyle === "right") {
+		// 			this.settings.positionStyle = "left";
+		// 		} else if (this.settings.positionStyle === "both") {
+		// 			new Notice("Position style set to both. Toogle position only works when fixed position (left or right) is selected.");
+		// 		}
+		// 		this.saveSettings();
+		// 		dispatchEvent(new Event("refresh-toc"))
+		// 	},
+		// });
 
 
-					const file = this.app.workspace.getActiveFile()
-					const content = await (this.app as any).vault.cachedRead(file);
-					const lines = content.split('\n');
-					let numberOfLines = lines.length;
-					//in preview mode don't count empty lines at the end
-					if (view.getMode() === 'preview') {
-						while (numberOfLines > 0 && lines[numberOfLines - 1].trim() === '') {
-							numberOfLines--;
-						}
-					}
-					view.currentMode.applyScroll((numberOfLines - 1))
-
-
-				}
-			},
-		});
-		this.addCommand({
-			id: "scroll-to-top",
-			name: "Scroll to Top",
-			icon: "double-up-arrow-glyph",
-			callback: async () => {
-				const view =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (view) {
-					view.setEphemeralState({ scroll: 0 });
-				}
-			},
-		});
-		this.addCommand({
-			id: "toggle-position-style",
-			name: "Toggle Floating TOC Position (left/right)",
-			icon: "switch",
-			callback: () => {
-				if (this.settings.positionStyle === "left") {
-					this.settings.positionStyle = "right";
-				} else if (this.settings.positionStyle === "right") {
-					this.settings.positionStyle = "left";
-				} else if (this.settings.positionStyle === "both") {
-					new Notice("Position style set to both. Toogle position only works when fixed position (left or right) is selected.");
-				}
-				this.saveSettings();
-				dispatchEvent(new Event("refresh-toc"))
-			},
-		});
- 
- 	
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", () => {
 				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -360,9 +360,9 @@ export default class FloatingToc extends Plugin {
                 }
 
 				let heading = this.app.metadataCache.getFileCache(current_file)?.headings;
-				if (!heading) 
+				if (!heading)
 					return;
-		
+
 				this.headingdata = heading;
 
 				if (this.settings.ignoreHeaders) {
@@ -390,9 +390,9 @@ export default class FloatingToc extends Plugin {
 					this.app.metadataCache.on("changed", () => {
 						const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 						if (!view || view.file?.path !== this.currentFile) return;
-			
+
 						const current_file = view.file;
-						
+
 						let heading = this.app.metadataCache.getFileCache(current_file)?.headings;
 						// 如果文件不再有标题，清除目录
 						if (!heading?.length) {
@@ -400,36 +400,36 @@ export default class FloatingToc extends Plugin {
 							selfDestruct();
 							return;
 						}
-			
+
 						// 在比较前标准化两边的标题，移除所有 Markdown 语法
 						const normalizedNewHeadings = heading.map(h => ({
 							...h,
 							heading: this.removeMarkdownSyntax(h.heading)
 						}));
-						
-						const normalizedOldHeadings = this.headingdata ? 
+
+						const normalizedOldHeadings = this.headingdata ?
 							this.headingdata.map((h: HeadingCache) => ({
 								...h,
 								heading: this.removeMarkdownSyntax(h.heading)
 							})) : null;
-			
+
 						// 检查标题结构是否有实质性变化
 						const structuralChanges = this.hasStructuralHeadingChanges(
-							normalizedNewHeadings, 
+							normalizedNewHeadings,
 							normalizedOldHeadings
 						);
-			
+
 						// 只有结构变化时才重建大纲
 						if (structuralChanges) {
 							this.headingdata = heading;
-						
+
 							if (this.settings.ignoreHeaders) {
 								let levelsToFilter = this.settings.ignoreHeaders.split("\n");
 								this.headingdata = heading.filter(
 									(item) => !levelsToFilter.includes(item.level.toString())
 								);
 							}
-							
+
 							// 完全重建大纲
 							refresh_outline(view, true);
 						} else {
@@ -448,8 +448,8 @@ export default class FloatingToc extends Plugin {
 			this.lastRefreshTime = now;
 			updateHeadingsForView(view);
 		};
-	
-		 
+
+
 
 		activeDocument.addEventListener(
 			"scroll",
@@ -463,7 +463,7 @@ export default class FloatingToc extends Plugin {
 		updateHeadingsForView(
 			this.app.workspace.getActiveViewOfType(MarkdownView)
 		);
-		
+
 			this.app.workspace.on("window-open", (leaf) => {
 				console.log("window-open")
 				leaf.doc.addEventListener(
@@ -474,8 +474,8 @@ export default class FloatingToc extends Plugin {
 					true
 				);
 			});
-		
-		
+
+
 		this.app.workspace.onLayoutReady(() => {
 			this.app.workspace.trigger("parse-style-settings");
 		});
@@ -483,8 +483,8 @@ export default class FloatingToc extends Plugin {
 
 	public updateTocWidth =  debounce((float_toc_dom: HTMLElement, headingdata: HeadingCache[]) => {
 	    // 18rem大约对应20个中文字符或30个英文字符
-		
-    
+
+
 		// 快速估算最长标题的字符长度
 		const maxLength = headingdata.reduce((maxLen, heading) => {
 			// 快速估算实际显示长度
@@ -494,61 +494,61 @@ export default class FloatingToc extends Plugin {
 				.reduce((len, char) => {
 					return len + (/[\u4e00-\u9fa5]/.test(char) ? 1 : 0.6);
 				}, 0);
-			
-	 
+
+
 			// 返回最大长度
 			return Math.max(maxLen, effectiveLength );
 		}, 0);
-		
-	
-	
-		const maxTextWidth = Math.ceil(maxLength) + 'rem'; 
+
+
+
+		const maxTextWidth = Math.ceil(maxLength) + 5 + 'rem';
 		activeDocument.body.style.setProperty('--actual-toc-width', `${maxTextWidth}`);
-	   
+
 	}, 100);
 
 	private removeMarkdownSyntax(heading: string): string {
 		if (!heading) return "";
-		
+
 		// 分步处理不同类型的 Markdown 语法
 		let cleanedHeading = heading;
-		
+
 		// 1. 处理粗体和斜体
 		cleanedHeading = cleanedHeading
 			.replace(/\*\*(.*?)\*\*/g, "$1")    // 粗体 **text**
 			.replace(/__(.*?)__/g, "$1")        // 粗体 __text__
 			.replace(/\*(.*?)\*/g, "$1")        // 斜体 *text*
 			.replace(/_(.*?)_/g, "$1");         // 斜体 _text_
-		
+
 		// 2. 处理代码和删除线
 		cleanedHeading = cleanedHeading
 			.replace(/`([^`]+)`/g, "$1")        // 行内代码 `code`
 			.replace(/~~(.*?)~~/g, "$1");       // 删除线 ~~text~~
-		
+
 		// 3. 处理高亮
 		cleanedHeading = cleanedHeading
 			.replace(/==(.*?)==/g, "$1");       // 高亮 ==text==
-		
+
 		// 4. 处理链接
 		cleanedHeading = cleanedHeading
 			.replace(/\[(.*?)\]\([^\)]+\)/g, "$1")  // [text](url)
 			.replace(/\[\[(.*?)(\|.*?)?\]\]/g, "$1"); // Wiki链接 [[page|text]]
-		
+
 		// 5. 处理HTML标签
 		cleanedHeading = cleanedHeading
 			.replace(/<[^>]+>/g, "");           // HTML标签
-		
+
 		// 6. 移除标题标记符号
 		cleanedHeading = cleanedHeading
 			.replace(/^#+\s+/, "");             // 标题前的 # 符号
-		
+
 		return cleanedHeading.trim();
 	}
     // 添加辅助方法来比较标题是否发生变化
 	private hasHeadingsChanged(newHeadings: HeadingCache[], oldHeadings: HeadingCache[]): boolean {
         if (!oldHeadings || newHeadings.length !== oldHeadings.length) return true;
 
-        const normalizeHeading = (h: HeadingCache) => 
+        const normalizeHeading = (h: HeadingCache) =>
             `${h.heading}|${h.level}|${h.position.start.line}`;
 
            // 使用 every 而不是 some，这样更容易调试
@@ -587,7 +587,7 @@ export default class FloatingToc extends Plugin {
 			const level = li.getAttribute("data-level");
 			const textEl = li.querySelector(".text-wrap a.text") as HTMLElement;
 			if (!textEl) return;
-			
+
 			const text = textEl.innerText;
 			const key = `${text}|${level}`;
 			
@@ -621,7 +621,7 @@ export default class FloatingToc extends Plugin {
 		requireApiVersion("0.15.0")
 			? (activeDocument = activeWindow.document)
 			: (activeDocument = window.document);
-		
+
 		// 清理滚动事件监听器
 		try {
 			activeDocument.removeEventListener(
@@ -634,7 +634,7 @@ export default class FloatingToc extends Plugin {
 		} catch (e) {
 			console.error("Error removing scroll event listener:", e);
 		}
-		
+
 		// 清理虚拟列表和其他资源
 		try {
 			const view = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -650,7 +650,7 @@ export default class FloatingToc extends Plugin {
 							item.parentNode.replaceChild(clone, item);
 						}
 					});
-					
+
 					// 清理自定义清理函数
 					if ((floatingTocWrapper as any)._tocCleanup) {
 						(floatingTocWrapper as any)._tocCleanup();
@@ -660,7 +660,7 @@ export default class FloatingToc extends Plugin {
 		} catch (e) {
 			console.error("Error cleaning up resources:", e);
 		}
-		
+
 		// 移除所有浮动目录元素
 		selfDestruct();
 	}

@@ -5,7 +5,7 @@
 	"main": "src/main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "node esbuild.config.mjs production"
+		"build": "node esbuild.config.mjs production && cp styles.css build/main.js build/manifest.json /Users/charles.zhai/Documents/ORISON/.obsidian/plugins/floating-toc/"
 	},
 	"keywords": [],
 	"author": "Curt Grimes",
